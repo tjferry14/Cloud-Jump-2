@@ -7,5 +7,6 @@ Extra Features so far:
 ------------
 * Sounds
 * Play in Portrait or Landscape Mode
+* Save users' high score 
 
 [1]: https://gist.github.com/BashedCrab/9098744

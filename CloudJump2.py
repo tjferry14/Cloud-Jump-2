@@ -1,6 +1,7 @@
 from scene import *
 from sound import load_effect, play_effect
 from random import randint, random
+import json
 from math import sin
 from functools import partial
 
@@ -20,6 +21,8 @@ GAME_GRAVITY = 2000
 GAME_WAITING = 0
 GAME_PLAYING = 1
 GAME_DEAD = 2
+
+player_name = 'John Doe'
 
 load_effect('Boing_1')
 load_effect('Crashing')
@@ -200,6 +203,29 @@ class MyScene (Scene):
 		tint(0.00, 0.50, 1.00)
 		text(s, 'AppleSDGothicNeo-Bold', 48, x, y)
 
+	def score_text(self, s, x, y):
+		tint(0,0,0)
+		text(s, 'AppleSDGothicNeo-Bold', 48, x + 2, y - 2)
+		tint(1.00, 1.00, 0.40)
+		text(s, 'AppleSDGothicNeo-Bold', 48, x, y)
+		
+	def high_score(self, name, score):
+		file_name = 'highscores.json'
+		high_scores = {}
+		
+		try:
+			with open(file_name) as in_file:
+				high_scores = json.load(in_file)
+		except IOError:
+			pass
+
+		curr_high_score = high_scores.get(name, score - 1)
+		if score >= curr_high_score:
+				high_scores[name] = score
+				self.score_text('NEW HIGH SCORE!', self.bounds.w / 2, self.bounds.h * 0.75)	
+				with open(file_name, 'w') as out_file:
+					json.dump(high_scores, out_file)
+
 	def draw_text(self):
 		if(self.game_state == GAME_WAITING):
 			self.shadow_text('Tap Screen to Start', self.bounds.w / 2, self.bounds.h * 0.6)
@@ -210,6 +236,7 @@ class MyScene (Scene):
 			self.shadow_text('Score : ' + str(int(self.climb / 10)), self.bounds.w / 2, self.bounds.h * 0.95)
 			self.shadow_text('Game Over', self.bounds.w / 2, self.bounds.h * 0.6)
 			self.shadow_text('Tap to Play Again', self.bounds.w / 2, self.bounds.h * 0.4)
+			self.high_score(player_name, int(self.climb / 10))
 
 	def setup(self):
 		self.game_state = GAME_WAITING
