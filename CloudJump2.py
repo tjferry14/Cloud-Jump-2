@@ -130,8 +130,7 @@ class MyScene (Scene):
 			self.scenery.append(cloud)
 		
 	def cull_scenery(self):
-		i = len(self.scenery)
-		for sprite in self.scenery[:]:
+		for sprite in self.scenery:
 			if sprite.bounds.top() < 0:
 				self.scenery.remove(sprite)
 
