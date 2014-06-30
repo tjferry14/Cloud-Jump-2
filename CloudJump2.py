@@ -2,6 +2,7 @@ from scene import *
 from sound import load_effect, play_effect
 from random import randint, random
 import json
+import console
 from math import sin
 from functools import partial
 
