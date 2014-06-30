@@ -22,8 +22,26 @@ GAME_WAITING = 0
 GAME_PLAYING = 1
 GAME_DEAD = 2
 
-player_name = 'John Doe'
-
+if os.path.isfile('names.json'): # if there is a file with names...
+	text_file = open("names.json") # only open it in normal mode
+else: # if not...
+	text_file = open("names.json", "w+") # make one
+	
+if os.stat("names.json").st_size > 0:
+	for line in text_file:
+		if line.istitle():
+			player_name = line
+		else:
+			player_name = console.input_alert('What is your name? ').title()
+			text_file = open("names.json", "w")
+			text_file.write(player_name)
+			text_file.close()
+else:
+	player_name = console.input_alert('What is your name? ').title()
+	text_file = open("names.json", "w")
+	text_file.write(player_name)
+	text_file.close()
+	
 load_effect('Boing_1')
 load_effect('Crashing')
 
@@ -279,5 +297,3 @@ class MyScene (Scene):
 			self.setup()
 
 run(MyScene())
-
-
