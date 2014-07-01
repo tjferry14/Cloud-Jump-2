@@ -24,7 +24,7 @@ GAME_WAITING = 0
 GAME_PLAYING = 1
 GAME_DEAD = 2
 
-if os.path.isfile('names.json'): # if there is a file with names...
+if os.path.isfile("names.json"): # if there is a file with names...
 	text_file = open("names.json") # only open it in normal mode
 else: # if not...
 	text_file = open("names.json", "w+") # make one
@@ -44,6 +44,7 @@ else:
 	text_file.write(player_name)
 	text_file.close()
 	
+# to reduce latency, preload effects in	
 load_effect('Boing_1')
 load_effect('Crashing')
 
@@ -217,13 +218,13 @@ class MyScene (Scene):
 				self.generate_clouds()
 				self.player_apex_frame = False
 
-	def shadow_text(self, s, x, y):
+	def shadow_text(self, s, x, y): # text for end of game and score keeping
 		tint(0,0,0)
 		text(s, 'AppleSDGothicNeo-Bold', 48, x + 2, y - 2)
 		tint(0.00, 0.50, 1.00)
 		text(s, 'AppleSDGothicNeo-Bold', 48, x, y)
 
-	def score_text(self, s, x, y):
+	def score_text(self, s, x, y): # text for a new player high score
 		tint(0,0,0)
 		text(s, 'AppleSDGothicNeo-Bold', 48, x + 2, y - 2)
 		tint(1.00, 1.00, 0.40)
