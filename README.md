@@ -12,9 +12,10 @@ Additional features so far:
 
 #### Currently working on: **Monsters**
 
-To Add:
+To Do:
 ------
-- [ ] Menu with character selection using multi scene 
+- [ ] Add a game menu with character selection using multi scene 
 - [ ] Replace `console.input_alert` with a textfield and button from the UI module
+- [ ] Clean up code
 
 [1]: https://gist.github.com/BashedCrab/9098744
