@@ -23,6 +23,7 @@ GAME_GRAVITY = 2000
 GAME_WAITING = 0
 GAME_PLAYING = 1
 GAME_DEAD = 2
+ENEMY_DENSITY=0.2
 
 if os.path.isfile("names.json"): # if there is a file with names...
 	text_file = open("names.json") # only open it in normal mode
@@ -75,9 +76,11 @@ class Cloud (object):
 			y = (random()-0.5) * 30
 			rad = randint(50, 100)
 			self.shapes.append([x, y, rad])
+	
 
 		self.width = num_circles * 30 + 30
 		self.bounds = Rect(0, 0, self.width, 60)
+		
 
 	def is_colliding(self, pos):
 		startp = self.bounds.x - self.width/2
@@ -103,20 +106,25 @@ class Cloud (object):
 		pop_matrix()
 
 class Enemy (object):
-	def __init__(self, scene):
+	def __init__(self, scene,startcloud):
 		self.scene = scene
+
+		
 		self.hit = False
-		self.x = randint(20, 768-20)
+		self.x = startcloud.bounds.x
 		self.initial_x = self.x
-		self.y = 1024
+		self.y = startcloud.bounds.y
 		self.removed = False
+		self.dead = False
 		self.size = 64
 		self.color = Color(1, 0, 1)
-		self.speed = 1.0 / self.size * 100
+		self.speed = 0     #1.0 / self.size * 100
+		self.amp = 0   #    random() * 300
 		
 	def update(self, dt):
 		self.y -= self.speed
-		self.x = self.initial_x + sin(self.y / 100)
+		self.x = self.initial_x +  sin(self.y / 100) * self.amp
+		self.amp = max(self.amp * 0.99, 0)
 		if self.y < -64:
 			self.removed = True
 		else:
@@ -149,6 +157,9 @@ class MyScene (Scene):
 			cloud.bounds.x = random() * (self.bounds.w - 150)
 			cloud.bounds.y = self.cloud_height
 			self.scenery.append(cloud)
+			if random() < ENEMY_DENSITY:
+				#generate new enemy
+				self.enemies.append(Enemy(self,cloud))
 		
 	def cull_scenery(self):
 		for sprite in self.scenery:
@@ -170,6 +181,8 @@ class MyScene (Scene):
 		self.cloud_height -= y
 		for sprite in self.scenery:
 			sprite.bounds.y -= y
+		for enemy in self.enemies:
+			enemy.y -= y
 
 	def run_gravity(self):
 		global enemy_bounds
@@ -260,7 +273,8 @@ class MyScene (Scene):
 		self.game_state = GAME_WAITING
 		self.bullets = []
 		self.scenery = []
-		self.climb = 0
+		self.climb = 0		
+		self.enemies = []	
 		self.create_ground()
 		self.cloud_height = 200
 		self.generate_clouds()
@@ -268,12 +282,12 @@ class MyScene (Scene):
 		self.player_apex_frame = False
 		self.player.bounds = Rect(self.bounds.w / 2 - IMAGE_WIDTH / 2, BLOCK_HEIGHT + BLOCK_DEPTH / 2, IMAGE_WIDTH, IMAGE_HEIGHT)
 		self.player_max_y = self.bounds.h * 0.6
-		self.enemies = []
-		self.spawn()
+
+	#	self.spawn()
 	
-	def spawn(self):
-		self.enemies.append(Enemy(self))
-		self.delay(random() + 1.9, self.spawn)
+	#def spawn(self):
+#		self.enemies.append(Enemy(self))
+	#	self.delay(random() + 1.9, self.spawn)
 
 	def draw(self):
 		self.game_loop()
