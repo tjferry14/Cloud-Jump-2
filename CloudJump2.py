@@ -110,7 +110,6 @@ class Enemy (object):
 		self.initial_x = self.x
 		self.y = 1024
 		self.removed = False
-		self.dead = False
 		self.size = 64
 		self.color = Color(1, 0, 1)
 		self.speed = 1.0 / self.size * 100
@@ -119,7 +118,6 @@ class Enemy (object):
 	def update(self, dt):
 		self.y -= self.speed
 		self.x = self.initial_x + sin(self.y / 100) * self.amp
-		self.amp = max(self.amp * 0.99, 0)
 		if self.y < -64:
 			self.removed = True
 		else:
