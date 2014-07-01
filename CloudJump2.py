@@ -108,8 +108,6 @@ class Cloud (object):
 class Enemy (object):
 	def __init__(self, scene,startcloud):
 		self.scene = scene
-
-		
 		self.hit = False
 		self.x = startcloud.bounds.x
 		self.initial_x = self.x
@@ -282,12 +280,6 @@ class MyScene (Scene):
 		self.player_apex_frame = False
 		self.player.bounds = Rect(self.bounds.w / 2 - IMAGE_WIDTH / 2, BLOCK_HEIGHT + BLOCK_DEPTH / 2, IMAGE_WIDTH, IMAGE_HEIGHT)
 		self.player_max_y = self.bounds.h * 0.6
-
-	#	self.spawn()
-	
-	#def spawn(self):
-#		self.enemies.append(Enemy(self))
-	#	self.delay(random() + 1.9, self.spawn)
 
 	def draw(self):
 		self.game_loop()
