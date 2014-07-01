@@ -113,11 +113,10 @@ class Enemy (object):
 		self.size = 64
 		self.color = Color(1, 0, 1)
 		self.speed = 1.0 / self.size * 100
-		self.amp = random() * 300
 		
 	def update(self, dt):
 		self.y -= self.speed
-		self.x = self.initial_x + sin(self.y / 100) * self.amp
+		self.x = self.initial_x + sin(self.y / 100)
 		if self.y < -64:
 			self.removed = True
 		else:
