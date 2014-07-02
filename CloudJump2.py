@@ -1,4 +1,4 @@
-import console, json, math, os, random, scene, sound
+import console, json, math, os, random, scene, sound, time
 
 IMAGE_WIDTH = 100
 DEAD_ZONE =  0.02
@@ -13,8 +13,6 @@ ENEMY_DENSITY = 0.2
 GAME_FONT = 'AppleSDGothicNeo-Bold' # easier to change font later
 GAME_CHARACTER = 'Boy'
 USER_FILE = "user.json"
-    
-enemy_frame = scene.Rect()
 
 player_name = None
 if os.path.isfile(USER_FILE):
@@ -107,7 +105,7 @@ class MyScene(scene.Scene):
         block_size_h = block_size_w * 171 / 101  # image is 101 x 171 pixels
         for i in xrange(max_blocks):
             rect = scene.Rect(i * block_size_w, 0, block_size_w, block_size_h)
-            self.scenery.append(GrassBlock(rect, self))
+            GrassBlock(rect, self)
         return block_size_h * 0.7  # the new ground level
 
     def generate_clouds(self):
@@ -126,12 +124,16 @@ class MyScene(scene.Scene):
                 rect = scene.Rect(0, 0, 64, 64)
                 rect.center(cloud.frame.center())
                 #rect.x += 20
-                self.enemies.append(Enemy(rect, self))
+                Enemy(rect, self)
 
     def cull_scenery(self):
         for sprite in self.scenery:
             if sprite.frame.top() < 0:
                 self.scenery.remove(sprite)
+        for sublayer in self.root_layer.sublayers:
+            if sublayer.frame.top() < 0:
+                self.root_layer.remove_layer(sublayer)
+                del sublayer
 
     def control_player(self):
         tilt = scene.gravity().x
@@ -148,8 +150,9 @@ class MyScene(scene.Scene):
         self.cloud_height -= y
         for sprite in self.scenery:
             sprite.frame.y -= y
-        for enemy in self.enemies:
-            enemy.frame.y -= y
+        for sublayer in self.root_layer.sublayers:
+            if sublayer is not self.player:
+                sublayer.frame.y -= y
 
     def run_gravity(self):
         global enemy_frame
@@ -167,24 +170,26 @@ class MyScene(scene.Scene):
         elif self.player.frame.top() < 0 :
             self.game_state = GAME_DEAD
             sound.play_effect('Crashing')
-        elif self.player.frame.intersects(enemy_frame):
-            self.game_state = GAME_DEAD
-            sound.play_effect('Powerup_1')
 
     def collision_detect(self):
         bounce = False
         if self.player.velocity < 0:
-            p = scene.Point(self.player.frame.x + self.player.frame.w/2,
-            self.player.frame.y)
+            for sublayer in self.root_layer.sublayers:
+                if (isinstance(sublayer, Enemy)
+                and self.player.frame.intersects(sublayer.frame)):
+                    self.game_state = GAME_DEAD
+                    for sublayer in self.root_layer.sublayers:
+                        sublayer.frame.y = -500
+                    sound.play_effect('Powerup_1')
+                    return True  # player was killed
+            p = scene.Point(self.player.frame.center().x, self.player.frame.y)
             for sprite in self.scenery:
-                if hasattr(sprite, 'is_colliding'):
-                    collision = sprite.is_colliding(p)
-                else:
-                    collision = p in sprite.frame
+                collision = p in sprite.frame
                 if collision:
                     self.player.velocity = PLAYER_BOUNCE_VELOCITY
                     sound.play_effect('Boing_1')
                     break
+        return False  # player was not killed
 
     def game_loop(self):
         if self.game_state == GAME_PLAYING:
@@ -210,29 +215,32 @@ class MyScene(scene.Scene):
         if score >= curr_high_score:
             high_scores[name] = score
             score_text('NEW HIGH SCORE!', self.bounds.w / 2, self.bounds.h * 0.75)
+            sound.play_effect('Coin_1')'Hit_3'
             with open(file_name, 'w') as out_file:
                 json.dump(high_scores, out_file)
+            for i in xrange(3):
+                sound.play_effect('Hit_3')
+                time.sleep(0.3)
 
     def draw_text(self):
         score = int(self.climb / 10)
         s = 'Score: {}'.format(score)
         x = self.bounds.center().x
-        if self.game_state == GAME_WAITING:
-            shadow_text('Tap Screen to Start',  x, self.bounds.h * 0.6)
-            shadow_text('Tilt Screen to Steer', x, self.bounds.h * 0.4)
-        elif self.game_state == GAME_PLAYING:
+        if self.game_state == GAME_PLAYING:
             shadow_text(s, x, self.bounds.h * 0.95)
-        if(self.game_state == GAME_DEAD):
+        elif self.game_state == GAME_DEAD):
             shadow_text(s, x, self.bounds.h * 0.95)
             shadow_text('Game Over', x, self.bounds.h * 0.6)
             shadow_text('Tap to Play Again', x, self.bounds.h * 0.4)
             self.high_score(player_name, score)
+        elif self.game_state == GAME_WAITING:
+            shadow_text('Tap Screen to Start',  x, self.bounds.h * 0.6)
+            shadow_text('Tilt Screen to Steer', x, self.bounds.h * 0.4)
 
     def setup(self):
         self.game_state = GAME_WAITING
         self.climb = 0
         self.scenery = []
-        self.enemies = []
         ground_level = self.create_ground(12)
         self.cloud_height = 200
         self.generate_clouds()
@@ -247,16 +255,11 @@ class MyScene(scene.Scene):
     def draw(self):
         self.game_loop()
         scene.background(0.40, 0.80, 1.00)
+        self.root_layer.update(self.dt)
+        self.root_layer.draw()
         for sprite in self.scenery:
             sprite.draw()
-        self.player.draw()
         self.draw_text()
-
-        global enemy_frame
-        for enemy in self.enemies:
-            enemy.update(self.dt)
-            enemy.draw()
-            enemy_rect = enemy_frame
 
     def touch_began(self, touch):
         if self.game_state == GAME_WAITING:
