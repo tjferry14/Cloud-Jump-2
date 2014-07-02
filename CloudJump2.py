@@ -86,12 +86,9 @@ class Cloud(object):
 
     def is_colliding(self, pos):
         startp = self.bounds.x - self.width/2
-        endp = self.bounds.x + self.width/2
-        if ((pos.x < endp) and (pos.x > startp) and
-        (pos.y < (self.bounds.y + 30)) and
-        (pos.y > (self.bounds.y + 10))):
-            return True
-        return False
+        endp   = self.bounds.x + self.width/2
+        return (startp < pos.x < endp
+            and self.bounds.y + 10 < pos.y < self.bounds.y + 30)
 
     def draw(self):
         scene.push_matrix()
