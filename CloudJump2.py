@@ -1,10 +1,7 @@
 import console, json, math, os, random, scene, sound
 
-IMAGE_WIDTH = 101
-IMAGE_HEIGHT = 171
-IMAGE_Y_OFFSET = -30
-#BLOCK_HEIGHT = 40
-#BLOCK_DEPTH = 80
+IMAGE_WIDTH = 100
+
 DEAD_ZONE =  0.02
 PLAYER_CONTROL_SPEED = 2000
 PLAYER_BOUNCE_VELOCITY = 1700
@@ -60,14 +57,10 @@ class Sprite(scene.Layer):
             parent.add_layer(self)
         self.image = image_name
 
-class Player(object):
-    def __init__(self):
-        self.frame = scene.Rect()
+class Player(Sprite):
+    def __init__(self, rect = scene.Rect(), parent = None):
+        super(self.__class__, self).__init__(rect, parent, 'Boy')
         self.velocity = 0
-
-    def draw(self):
-        scene.tint(1,1,1)
-        scene.image('Boy', self.frame.x, self.frame.y + IMAGE_Y_OFFSET)
 
 class GrassBlock(Sprite):
     def __init__(self, rect = scene.Rect(), parent = None):
@@ -147,11 +140,12 @@ class MyScene(scene.Scene):
         scene.run(self)
 
     def create_ground(self, max_blocks = 12):
-        block_size = self.bounds.w / max_blocks
+        block_size_w = self.bounds.w / max_blocks
+        block_size_h = block_size_w * 171 / 101  # image is 101 x 171 pixels
         for i in xrange(max_blocks):
-            rect = scene.Rect(i * block_size, 0, block_size, block_size)
+            rect = scene.Rect(i * block_size_w, 0, block_size_w, block_size_h)
             self.scenery.append(GrassBlock(rect, self))
-        return block_size  # the new ground level
+        return block_size_h * 0.7  # the new ground level
 
     def generate_clouds(self):
         y = self.cloud_height
@@ -272,17 +266,18 @@ class MyScene(scene.Scene):
 
     def setup(self):
         self.game_state = GAME_WAITING
-        self.scenery = []
         self.climb = 0
+        self.scenery = []
         self.enemies = []
         ground_level = self.create_ground(12)
         self.cloud_height = 200
         self.generate_clouds()
-        self.player = Player()
+        
+        rect = scene.Rect(0, 0, IMAGE_WIDTH, IMAGE_WIDTH)
+        rect.center(self.bounds.center())
+        rect.y = ground_level
+        self.player = Player(rect, self)
         self.player_apex_frame = False
-        self.player.frame = scene.Rect(0, 0, IMAGE_WIDTH, IMAGE_HEIGHT)
-        self.player.frame.center(self.bounds.center())
-        self.player.frame.y = ground_level
         self.player_max_y = self.bounds.h * 0.6
 
     def draw(self):
