@@ -34,9 +34,9 @@ for s in 'Boing_1 Crashing Powerup_1'.split():
 
 def tinted_text(s, x, y, tint_color = scene.Color(0, 0, 1)):
     scene.tint(0, 0, 0)
-    scene.text(s, 'AppleSDGothicNeo-Bold', 48, x + 2, y - 2)
+    scene.text(s, GAME_FONT, 48, x + 2, y - 2)
     scene.tint(*tint_color)
-    scene.text(s, 'AppleSDGothicNeo-Bold', 48, x, y)
+    scene.text(s, GAME_FONT, 48, x, y)
 
 def shadow_text(s, x, y):
     tinted_text(s, x, y, scene.Color(0.0, 0.5, 1.0))
@@ -209,9 +209,7 @@ class MyScene(scene.Scene):
         curr_high_score = high_scores.get(name, score - 1)
         if score >= curr_high_score:
             high_scores[name] = score
-            score_text('NEW HIGH SCORE!',
-            self.bounds.w / 2,
-            self.bounds.h * 0.75)
+            score_text('NEW HIGH SCORE!', self.bounds.w / 2, self.bounds.h * 0.75)
             with open(file_name, 'w') as out_file:
                 json.dump(high_scores, out_file)
 
