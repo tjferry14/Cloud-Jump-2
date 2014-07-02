@@ -227,7 +227,7 @@ class MyScene(scene.Scene):
         x = self.bounds.center().x
         if self.game_state == GAME_PLAYING:
             shadow_text(s, x, self.bounds.h * 0.95)
-        elif self.game_state == GAME_DEAD):
+        elif self.game_state == GAME_DEAD:
             shadow_text(s, x, self.bounds.h * 0.95)
             shadow_text('Game Over', x, self.bounds.h * 0.6)
             shadow_text('Tap to Play Again', x, self.bounds.h * 0.4)
