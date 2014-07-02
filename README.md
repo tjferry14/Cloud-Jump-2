@@ -1,7 +1,7 @@
 Cloud Jump 2
 ================
 
-Expanding on the original [Cloud Jump][1] created [BashedCrab][2]. Special thanks to [cclauss][3] and [jsbain][4] for their contributions. 
+Expanding on the original [Cloud Jump][1] created by [BashedCrab][2]. Special thanks to [cclauss][3] and [jsbain][4] for their contributions. 
 
 Additional features so far:
 ------
