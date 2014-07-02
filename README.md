@@ -10,15 +10,10 @@ Additional features so far:
 * Player's High Score is saved
 	* Player's name is also saved, and only needs to be entered by the player once.
 
-#### Currently working on: **Monsters**
-
-To Do:
-------
-- [ ] Add a game menu with character selection using multi scene 
-- [ ] Replace `console.input_alert` with a textfield and button from the UI module
-- [ ] Clean up code
+See the [repo's issue page][5] to find out what is being worked on and what will be implemented next.
 
 [1]: https://gist.github.com/BashedCrab/9098744
 [2]: https://gist.github.com/BashedCrab
 [3]: https://github.com/cclauss
 [4]: https://github.com/jsbain
+[5]: https://github.com/tjferry14/Cloud-Jump-2/issues/milestones
