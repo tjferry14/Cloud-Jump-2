@@ -1,7 +1,7 @@
 Cloud Jump 2
 ================
 
-Expanding on the original [Cloud Jump] [1].
+Expanding on the original [Cloud Jump] [1]. Special thanks to [cclauss] [2] and [jsbain] [3] for their contributions. 
 
 Additional features so far:
 ------
@@ -19,3 +19,5 @@ To Do:
 - [ ] Clean up code
 
 [1]: https://gist.github.com/BashedCrab/9098744
+[2]: https://github.com/cclauss
+[3]: https://github.com/jsbain
