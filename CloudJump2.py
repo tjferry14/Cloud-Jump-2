@@ -15,25 +15,25 @@ GAME_GRAVITY = 2000
 GAME_WAITING, GAME_PLAYING, GAME_DEAD = range(3)
 ENEMY_DENSITY = 0.2
 GAME_FONT = 'AppleSDGothicNeo-Bold' # easier to change font later
-NAME_FILE = "names.json"
+USER_FILE = "user.json"
 
-if os.path.isfile(NAME_FILE): # if there is a file with names...
-    text_file = open(NAME_FILE) # only open it in normal mode
+if os.path.isfile(USER_FILE): # if there is a file with names...
+    text_file = open(USER_FILE) # only open it in normal mode
 else: # if not...
-    text_file = open(NAME_FILE, "w+") # make one
+    text_file = open(USER_FILE, "w+") # make one
 
-if os.stat(NAME_FILE).st_size > 0:
+if os.stat(USER_FILE).st_size > 0:
     for line in text_file:
         if line.istitle():
             player_name = line
         else:
             player_name = console.input_alert('What is your name? ').title()
-            text_file = open(NAME_FILE, "w")
+            text_file = open(USER_FILE, "w")
             text_file.write(player_name)
             text_file.close()
 else:
     player_name = console.input_alert('What is your name? ').title()
-    text_file = open(NAME_FILE, "w")
+    text_file = open(USER_FILE, "w")
     text_file.write(player_name)
     text_file.close()
 
