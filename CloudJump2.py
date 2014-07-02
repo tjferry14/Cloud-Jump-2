@@ -17,15 +17,15 @@ enemy_frame = scene.Rect()
 
 player_name = None
 if os.path.isfile(USER_FILE):
-  with open(USER_FILE) as f:
-      for line in f.readlines():
-          if line.istitle():
-              player_name = line
+    with open(USER_FILE) as f:
+        for line in f.readlines():
+            if line.istitle():
+                player_name = line
 
-with open(USER_FILE, 'w') as f:  
-    if player_name is None:
-      player_name = console.input_alert('What is your name? ').title()
-    f.write(player_name)
+if not player_name:
+    player_name = console.input_alert('What is your name? ').title() or 'Dummy'
+    with open(USER_FILE, 'w') as f:  
+        f.write(player_name)
 
 # to reduce latency, preload sound effects
 for s in 'Boing_1 Crashing Powerup_1'.split():
