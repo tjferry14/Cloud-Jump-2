@@ -23,7 +23,7 @@ if os.path.isfile(USER_FILE):
                 player_name = line
 
 if not player_name:
-    player_name = console.input_alert('What is your name? ').title() or 'Dummy'
+    player_name = console.input_alert('What is your name? ').title()
     with open(USER_FILE, 'w') as f:  
         f.write(player_name)
 
