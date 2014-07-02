@@ -147,11 +147,12 @@ class MyScene(scene.Scene):
         scene.run(self)
 
     def create_ground(self, max_blocks = 12):
-        block_size = self.bounds.w / max_blocks
+        block_size_w = self.bounds.w / max_blocks
+        block_size_h = block_size_w * 171 / 101  # image is 101 x 171 pixels
         for i in xrange(max_blocks):
-            rect = scene.Rect(i * block_size, 0, block_size, block_size)
+            rect = scene.Rect(i * block_size_w, 0, block_size_w, block_size_h)
             self.scenery.append(GrassBlock(rect, self))
-        return block_size  # the new ground level
+        return block_size_h * 0.88  # the new ground level
 
     def generate_clouds(self):
         y = self.cloud_height
