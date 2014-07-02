@@ -15,7 +15,7 @@ GAME_GRAVITY = 2000
 GAME_WAITING = 0
 GAME_PLAYING = 1
 GAME_DEAD = 2
-ENEMY_DENSITY=0.2
+ENEMY_DENSITY = 0.2
 
 if os.path.isfile("names.json"): # if there is a file with names...
     text_file = open("names.json") # only open it in normal mode
@@ -105,23 +105,26 @@ class Cloud(object):
 
 class Enemy(object):
     def __init__(self, start_cloud):
-        #self.scene = scene
-        #self.hit = False
+        self.scene = scene
+        self.hit = False
         self.x = self.initial_x = start_cloud.bounds.x
         self.y = start_cloud.bounds.center().y
-        #self.removed = False
-        #self.dead = False
+        self.removed = False
+        self.dead = False
         self.size = 64
         self.color = scene.Color(1, 0, 1)
         self.speed = 0     #1.0 / self.size * 100
         self.amp = 0   #    random() * 300
-
+        
     def update(self, dt):
         self.y -= self.speed
         self.x = self.initial_x +  math.sin(self.y / 100) * self.amp
         self.amp = max(self.amp * 0.99, 0)
-        #if self.y < -64:
-        #    self.removed = True
+        
+		if self.y < -64:
+ 			self.removed = True
+ 		else:
+ 			pass
 
     def draw(self):
         scene.tint(self.color.r, self.color.g, self.color.b, 1.0)
@@ -257,11 +260,11 @@ class MyScene(scene.Scene):
             shadow_text('Tap Screen to Start',  x, self.bounds.h * 0.6)
             shadow_text('Tilt Screen to Steer', x, self.bounds.h * 0.4)
         elif self.game_state == GAME_PLAYING:
-            shadow_text(s,                      x, self.bounds.h * 0.95)
+            shadow_text(s, x, self.bounds.h * 0.95)
         if(self.game_state == GAME_DEAD):
-            shadow_text(s,                      x, self.bounds.h * 0.95)
-            shadow_text('Game Over',            x, self.bounds.h * 0.6)
-            shadow_text('Tap to Play Again',    x, self.bounds.h * 0.4)
+            shadow_text(s, x, self.bounds.h * 0.95)
+            shadow_text('Game Over', x, self.bounds.h * 0.6)
+            shadow_text('Tap to Play Again', x, self.bounds.h * 0.4)
             self.high_score(player_name, score)
 
     def setup(self):
