@@ -1,7 +1,6 @@
 import console, json, math, os, random, scene, sound
 
 IMAGE_WIDTH = 100
-
 DEAD_ZONE =  0.02
 PLAYER_CONTROL_SPEED = 2000
 PLAYER_BOUNCE_VELOCITY = 1700
@@ -14,6 +13,8 @@ ENEMY_DENSITY = 0.2
 GAME_FONT = 'AppleSDGothicNeo-Bold' # easier to change font later
 USER_FILE = "user.json"
     
+enemy_frame = scene.Rect()
+
 player_name = None
 if os.path.isfile(USER_FILE):
   with open(USER_FILE) as f:
@@ -58,6 +59,11 @@ class GrassBlock(Sprite):
     def __init__(self, rect = scene.Rect(), parent = None):
         super(self.__class__, self).__init__(rect, parent, 'PC_Grass_Block')
 
+class Enemy(Sprite):
+    def __init__(self, rect = scene.Rect(), parent = None):
+        super(self.__class__, self).__init__(rect, parent, 'Alien_Monster')
+        self.tint = scene.Color(1, 0, 1)
+
 class Cloud(object):
     def __init__(self):
         self.shapes = []
@@ -91,42 +97,6 @@ class Cloud(object):
             scene.ellipse(i[0], i[1] + 5, i[2], i[2])
         scene.pop_matrix()
 
-class Enemy(object):
-    def __init__(self, start_cloud):
-        self.scene = scene
-        self.hit = False
-        self.x = self.initial_x = start_cloud.frame.x
-        self.y = start_cloud.frame.center().y
-        self.removed = False
-        self.dead = False
-        self.size = 64
-        self.color = scene.Color(1, 0, 1)
-        self.speed = 0     #1.0 / self.size * 100
-        self.amp = 0   #    random() * 300
-
-    def update(self, dt):
-        self.y -= self.speed
-        self.x = self.initial_x +  math.sin(self.y / 100) * self.amp
-        self.amp = max(self.amp * 0.99, 0)
-
-        if self.y < -64:
-            self.removed = True
-        else:
-            pass
-
-    def draw(self):
-        scene.tint(self.color.r, self.color.g, self.color.b, 1.0)
-        scene.image('Alien_Monster', self.x - self.size/2,
-        self.y - self.size/2,
-        self.size, self.size)
-        scene.tint(1, 1, 1)
-
-        global enemy_frame
-        s = self.size
-        enemy_frame = scene.Rect(self.x - s/2 * 0.9,
-        self.y - s/2 * 0.8,
-        s * 0.9, s * 0.8)
-
 class MyScene(scene.Scene):
     def __init__(self):
         scene.run(self)
@@ -152,7 +122,10 @@ class MyScene(scene.Scene):
             self.scenery.append(cloud)
             if random.random() < ENEMY_DENSITY:
                 #generate new enemy
-                self.enemies.append(Enemy(cloud))
+                rect = scene.Rect(0, 0, 64, 64)
+                rect.center(cloud.frame.center())
+                #rect.x += 20
+                self.enemies.append(Enemy(rect, self))
 
     def cull_scenery(self):
         for sprite in self.scenery:
@@ -175,7 +148,7 @@ class MyScene(scene.Scene):
         for sprite in self.scenery:
             sprite.frame.y -= y
         for enemy in self.enemies:
-            enemy.y -= y
+            enemy.frame.y -= y
 
     def run_gravity(self):
         global enemy_frame
