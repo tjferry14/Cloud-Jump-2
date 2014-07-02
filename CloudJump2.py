@@ -16,24 +16,26 @@ GAME_WAITING = 0
 GAME_PLAYING = 1
 GAME_DEAD = 2
 ENEMY_DENSITY = 0.2
+GAME_FONT = 'AppleSDGothicNeo-Bold' # easier to change font later
+NAME_FILE = "names.json"
 
-if os.path.isfile("names.json"): # if there is a file with names...
-    text_file = open("names.json") # only open it in normal mode
+if os.path.isfile(NAME_FILE): # if there is a file with names...
+    text_file = open(NAME_FILE) # only open it in normal mode
 else: # if not...
-    text_file = open("names.json", "w+") # make one
+    text_file = open(NAME_FILE, "w+") # make one
 
-if os.stat("names.json").st_size > 0:
+if os.stat(NAME_FILE).st_size > 0:
     for line in text_file:
         if line.istitle():
             player_name = line
         else:
             player_name = console.input_alert('What is your name? ').title()
-            text_file = open("names.json", "w")
+            text_file = open(NAME_FILE, "w")
             text_file.write(player_name)
             text_file.close()
 else:
     player_name = console.input_alert('What is your name? ').title()
-    text_file = open("names.json", "w")
+    text_file = open(NAME_FILE, "w")
     text_file.write(player_name)
     text_file.close()
 
@@ -43,15 +45,15 @@ for s in 'Boing_1 Crashing Powerup_1'.split():
 
 def shadow_text(s, x, y): # text for end of game and score keeping
     scene.tint(0,0,0)
-    scene.text(s, 'AppleSDGothicNeo-Bold', 48, x + 2, y - 2)
+    scene.text(s, GAME_FONT, 48, x + 2, y - 2)
     scene.tint(0.00, 0.50, 1.00)
-    scene.text(s, 'AppleSDGothicNeo-Bold', 48, x, y)
+    scene.text(s, GAME_FONT, 48, x, y)
 
 def score_text(s, x, y): # text for a new player high score
     scene.tint(0,0,0)
-    scene.text(s, 'AppleSDGothicNeo-Bold', 48, x + 2, y - 2)
+    scene.text(s, GAME_FONT, 48, x + 2, y - 2)
     scene.tint(1.00, 1.00, 0.40)
-    scene.text(s, 'AppleSDGothicNeo-Bold', 48, x, y)
+    scene.text(s, GAME_FONT, 48, x, y)
 
 class Player(object):
     def __init__(self):
@@ -269,7 +271,6 @@ class MyScene(scene.Scene):
 
     def setup(self):
         self.game_state = GAME_WAITING
-        #self.bullets = []
         self.scenery = []
         self.climb = 0
         self.enemies = []
