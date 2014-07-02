@@ -11,6 +11,7 @@ GAME_GRAVITY = 2000
 GAME_WAITING, GAME_PLAYING, GAME_DEAD = range(3)
 ENEMY_DENSITY = 0.2
 GAME_FONT = 'AppleSDGothicNeo-Bold' # easier to change font later
+GAME_CHARACTER = 'Boy'
 USER_FILE = "user.json"
     
 enemy_frame = scene.Rect()
@@ -52,7 +53,7 @@ class Sprite(scene.Layer):
 
 class Player(Sprite):
     def __init__(self, rect = scene.Rect(), parent = None):
-        super(self.__class__, self).__init__(rect, parent, 'Boy')
+        super(self.__class__, self).__init__(rect, parent, GAME_CHARACTER)
         self.velocity = 0
 
 class GrassBlock(Sprite):
