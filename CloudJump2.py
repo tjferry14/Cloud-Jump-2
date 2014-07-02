@@ -215,7 +215,6 @@ class MyScene(scene.Scene):
         if score >= curr_high_score:
             high_scores[name] = score
             score_text('NEW HIGH SCORE!', self.bounds.w / 2, self.bounds.h * 0.75)
-            sound.play_effect('Coin_1')'Hit_3'
             with open(file_name, 'w') as out_file:
                 json.dump(high_scores, out_file)
             for i in xrange(3):
