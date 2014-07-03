@@ -19,7 +19,7 @@ class Start (scene.Scene):
 			self.playsx, self.playsy = (358, 100)
 			scene.rect(self.playpx, self.playpy, self.playsx, self.playsy)
  
-		scene.fill(1.00, 1.00, 1.00) # character select fill color
+		scene.fill(1.00, 1.00, 1.00) # character select button fill color
  
 		if landscape: # character select button landscape
 			self.characpx, self.characpy = (20, 230)
@@ -31,24 +31,24 @@ class Start (scene.Scene):
 			self.characsx, self.characsy = (485, 100)
 			scene.rect(self.characpx, self.characpy, self.characsx, self.characsy)
  
-		scene.tint(1.00, 1.00, 1.00)
+		scene.tint(1.00, 1.00, 1.00) # white text color
 		if landscape:
 			scene.text('Cloud Jump', MENU_FONT, font_size=150.0, x=525.0, y=600.0)
 		if portrait:
 			scene.text('Cloud Jump', MENU_FONT, font_size=100.0, x=385.0, y=850.0)
  
-		if landscape: # landscape
+		if landscape: 
 			scene.text('Play Game', BUTTON_FONT, font_size=65.0, x=200.0, y=400.0)
-		if portrait: # portrait
+		if portrait: 
 			scene.text('Play Game', BUTTON_FONT, font_size=65.0, x=380.0, y=650.0)
  
-		scene.tint(0.00, 0.50, 1.00)
+		scene.tint(0.00, 0.50, 1.00) # blue text color
 		if landscape: 
 			scene.text('Character Select', BUTTON_FONT, font_size=54, x=260, y=285.0)
 		if portrait: 
 			scene.text('Character Select', BUTTON_FONT, font_size=54, x=380.0, y=521)
  
-		scene.tint(1.00, 1.00, 1.00)
+		scene.tint(1.00, 1.00, 1.00) # white text color
 		if landscape: 
 			scene.text('Welcome ' + player_name + '!', MENU_FONT, font_size=30.0, x=self.bounds.w / 1.4, y=self.bounds.h / 1.7)
 		if portrait: 
