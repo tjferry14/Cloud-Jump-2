@@ -3,7 +3,7 @@ import scene, sound
 player_name = 'TJ'
 MENU_FONT = 'AvenirNext-Heavy'
 BUTTON_FONT = 'Arial-BoldMT'
-GAME_CHARACTER = 'Boy'
+game_character = 'Boy'
 
 class Start (scene.Scene):
     def draw(self):
@@ -55,34 +55,32 @@ class CharacterSelect1(scene.Scene):
 	def setup(self):
 		center = self.bounds.center()
 		portrait = self.size.h > self.size.w
-		global p1_rect, p2_rect, p3_rect, p4_rect, p5_rect, p6_rect
 
 		if portrait:
-			p1_rect = scene.Rect(80, 735, 250, 250)
-			p2_rect = scene.Rect(400, 735, 250, 250)
-			p3_rect = scene.Rect(80, 395, 250, 250)
-			p4_rect = scene.Rect(400, 395, 250, 250)
-			p5_rect = scene.Rect(80, 80, 250, 250)
-			p6_rect = scene.Rect(400, 80, 250, 250)
+			self.p1_rect = scene.Rect(80, 735, 250, 250)
+			self.p2_rect = scene.Rect(400, 735, 250, 250)
+			self.p3_rect = scene.Rect(80, 395, 250, 250)
+			self.p4_rect = scene.Rect(400, 395, 250, 250)
+			self.p5_rect = scene.Rect(80, 80, 250, 250)
+			self.p6_rect = scene.Rect(400, 80, 250, 250)
 		else:
-			p1_rect = scene.Rect(40, 400, 250, 250)
-			p2_rect = scene.Rect(395, 400, 250, 250)
-			p3_rect = scene.Rect(735, 400, 250, 250)
-			p4_rect = scene.Rect(40, 80, 250, 250)
-			p5_rect = scene.Rect(395, 80, 250, 250)
-			p6_rect = scene.Rect(735, 80, 250, 250)
+			self.p1_rect = scene.Rect(40, 400, 250, 250)
+			self.p2_rect = scene.Rect(395, 400, 250, 250)
+			self.p3_rect = scene.Rect(735, 400, 250, 250)
+			self.p4_rect = scene.Rect(40, 80, 250, 250)
+			self.p5_rect = scene.Rect(395, 80, 250, 250)
+			self.p6_rect = scene.Rect(735, 80, 250, 250)
 
 	def draw(self):
-		global p1_rect, p2_rect, p3_rect, p4_rect, p5_rect, p6_rect
 		scene.background(0.40, 0.80, 1.00)
 		scene.fill(1.00, 1.00, 1.00)
 
-		scene.image('Boy', *p1_rect)
-		scene.image('Girl', *p2_rect)
-		scene.image('Guardsman', *p3_rect)
-		scene.image('Hamster_Face', *p4_rect)
-		scene.image('Mouse_Face', *p5_rect)
-		scene.image('Man', *p6_rect)
+		scene.image('Boy', *self.p1_rect)
+		scene.image('Girl', *self.p2_rect)
+		scene.image('Guardsman', *self.p3_rect)
+		scene.image('Hamster_Face', *self.p4_rect)
+		scene.image('Mouse_Face', *self.p5_rect)
+		scene.image('Man', *self.p6_rect)
 
 	def check(self, x, y, posx, posy, sizex, sizey):
 		if x >= posx and x <= posx + sizex:
@@ -98,35 +96,35 @@ class CharacterSelect1(scene.Scene):
 
 	def touch_ended(self, touch):
 		x, y = touch.location
-		global GAME_CHARACTER;
+		global game_character;
 
-		if touch.location in p1_rect:
-			GAME_CHARACTER = 'Boy'
+		if touch.location in self.p1_rect:
+			game_character = 'Boy'
 			sound.play_effect('Ding_3')
 			main_scene.switch_scene(#Game Scene Here)
 
-		if touch.location in p2_rect:
-			GAME_CHARACTER = 'Girl'
+		if touch.location in self.p2_rect:
+			game_character = 'Girl'
 			sound.play_effect('Ding_3')
 			main_scene.switch_scene(#Game Scene Here)
 
-		if touch.location in p3_rect:
-			GAME_CHARACTER = 'Guardsman'
+		if touch.location in self.p3_rect:
+			game_character = 'Guardsman'
 			sound.play_effect('Ding_3')
 			main_scene.switch_scene(#Game Scene Here)
 
-		if touch.location in p4_rect:
-			GAME_CHARACTER = 'Hamster_Face'
+		if touch.location in self.p4_rect:
+			game_character = 'Hamster_Face'
 			sound.play_effect('Ding_3')
 			main_scene.switch_scene(#Game Scene Here)
 
-		if touch.location in p5_rect:
-			GAME_CHARACTER = 'Mouse_Face'
+		if touch.location in self.p5_rect:
+			game_character = 'Mouse_Face'
 			sound.play_effect('Ding_3')
 			main_scene.switch_scene(#Game Scene Here)
 
-		if touch.location in p6_rect:
-			GAME_CHARACTER = 'Man'
+		if touch.location in self.p6_rect:
+			game_character = 'Man'
 			sound.play_effect('Ding_3')
 			main_scene.switch_scene(#Game Scene Here)
 
