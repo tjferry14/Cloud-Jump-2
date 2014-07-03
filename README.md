@@ -3,7 +3,7 @@ Cloud Jump 2
 
 Expanding on the original [Cloud Jump][1] created by [BashedCrab][2]. Special thanks to [cclauss][3] and [jsbain][4] for their contributions. 
 
-Additional features so far:
+Additional completed features so far:
 ------
 * Sound Effects (when bouncing on a cloud and when dying)
 * Play in Portrait or Landscape Mode
