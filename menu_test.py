@@ -1,8 +1,8 @@
 import scene
 
 player_name = 'TJ'
-MENU_FONT   = 'AppleSDGothicNeo-Bold'
-BUTTON_FONT = 'AppleSDGothicNeo-Bold'
+MENU_FONT = 'AvenirNext-Heavy'
+BUTTON_FONT = 'Arial-BoldMT'
 
 class Start (scene.Scene):
     def draw(self):
