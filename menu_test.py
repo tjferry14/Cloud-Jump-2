@@ -54,23 +54,23 @@ class Start (scene.Scene):
 class CharacterSelect1(scene.Scene):
 	def setup(self):
 		center = self.bounds.center()
+		portrait = self.size.h > self.size.w
 		global p1_rect, p2_rect, p3_rect, p4_rect, p5_rect, p6_rect
 
-		if self.size.w > self.size.h: # landscape
-			p1_rect = scene.Rect(40, 400, 250, 250)
-			p2_rect = scene.Rect(395, 400, 250, 250)
-			p3_rect = scene.Rect(735, 400, 250, 250)
-			p4_rect = scene.Rect(40, 80, 250, 250)
-			p5_rect = scene.Rect(395, 80, 250, 250)
-			p6_rect = scene.Rect(735, 80, 250, 250)
-
-		if self.size.h > self.size.w: # portrait
+		if portrait:
 			p1_rect = scene.Rect(80, 735, 250, 250)
 			p2_rect = scene.Rect(400, 735, 250, 250)
 			p3_rect = scene.Rect(80, 395, 250, 250)
 			p4_rect = scene.Rect(400, 395, 250, 250)
 			p5_rect = scene.Rect(80, 80, 250, 250)
 			p6_rect = scene.Rect(400, 80, 250, 250)
+		else:
+			p1_rect = scene.Rect(40, 400, 250, 250)
+			p2_rect = scene.Rect(395, 400, 250, 250)
+			p3_rect = scene.Rect(735, 400, 250, 250)
+			p4_rect = scene.Rect(40, 80, 250, 250)
+			p5_rect = scene.Rect(395, 80, 250, 250)
+			p6_rect = scene.Rect(735, 80, 250, 250)
 
 	def draw(self):
 		global p1_rect, p2_rect, p3_rect, p4_rect, p5_rect, p6_rect
