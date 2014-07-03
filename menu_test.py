@@ -43,15 +43,15 @@ class Start (scene.Scene):
 			scene.text('Play Game', BUTTON_FONT, font_size=65.0, x=380.0, y=650.0)
  
 		scene.tint(0.00, 0.50, 1.00)
-		if landscape: # landscape
+		if landscape: 
 			scene.text('Character Select', BUTTON_FONT, font_size=54, x=260, y=285.0)
-		if portrait: # portrait
+		if portrait: 
 			scene.text('Character Select', BUTTON_FONT, font_size=54, x=380.0, y=521)
  
 		scene.tint(1.00, 1.00, 1.00)
-		if landscape: # landscape
+		if landscape: 
 			scene.text('Welcome ' + player_name + '!', MENU_FONT, font_size=30.0, x=self.bounds.w / 1.4, y=self.bounds.h / 1.7)
-		if portrait: # portrait
+		if portrait: 
 			scene.text('Welcome ' + player_name + '!', MENU_FONT, font_size=30.0, x=self.bounds.w / 2, y=self.bounds.h / 1.34)
  
 		scene.image('PC_Grass_Block', self.bounds.x, self.bounds.y)
