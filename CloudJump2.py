@@ -12,19 +12,23 @@ GAME_WAITING, GAME_PLAYING, GAME_DEAD = range(3)
 ENEMY_DENSITY = 0.2
 GAME_FONT = 'AppleSDGothicNeo-Bold' # easier to change font later
 GAME_CHARACTER = 'Boy'
-USER_FILE = "user.json"
+USER_FILE = 'user.json'
 
-player_name = None
-if os.path.isfile(USER_FILE):
-    with open(USER_FILE) as f:
-        for line in f.readlines():
-            if line.istitle():
-                player_name = line
+def get_username(file_name = USER_FILE):
+    player_name = None
+    if os.path.isfile(file_name):
+        with open(file_name) as f:
+            for line in f.readlines():
+                if line.istitle():
+                    player_name = line
+    if not player_name:
+        player_name = console.input_alert('What is your name? ').title()
+        if player_name:
+            with open(file_name, 'w') as f:  
+                f.write(player_name)
+    return player_name or 'default'
 
-if not player_name:
-    player_name = console.input_alert('What is your name? ').title()
-    with open(USER_FILE, 'w') as f:  
-        f.write(player_name)
+player_name = get_username()
 
 # to reduce latency, preload sound effects
 for s in 'Boing_1 Crashing Powerup_1'.split():
