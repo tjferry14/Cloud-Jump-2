@@ -44,22 +44,10 @@ class Start (scene.Scene):
         for i in xrange(11):
             scene.image('PC_Grass_Block', self.bounds.w / 11 * i, 0)
 
-    #def check(self, x, y, posx, posy, sizex, sizey):
-    #    return (posx <= x <= posx + sizex
-    #        and posy <= y <= posy + sizey)
-
-    #def check_character(self, x, y):
-    #    return self.check(x, y, *self.char_btn_rect)
-
-    #def check_play(self, x, y):
-    #    return self.check(x, y, *self.play_btn_rect)
 
     def touch_ended(self, touch):
-        #x, y = touch.location
-        #if self.check_play(x, y):
         if touch.location in play_btn_rect:
             main_scene.switch_scene('#Game Scene Here')
-        #elif self.check_character(x, y):
         elif touch.location in char_btn_rect:
             main_scene.switch_scene('#Character Select Scene Here')
 
