@@ -88,12 +88,6 @@ class CharacterSelect1(scene.Scene):
 				return True
 		return False
 
-	def touch_began(self, touch):
-		pass
-
-	def touch_moved(self, touch):
-		pass
-
 	def touch_ended(self, touch):
 		x, y = touch.location
 		global game_character;
