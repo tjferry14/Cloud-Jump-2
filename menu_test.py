@@ -44,11 +44,10 @@ class Start (scene.Scene):
         for i in xrange(11):
             scene.image('PC_Grass_Block', self.bounds.w / 11 * i, 0)
 
-
     def touch_ended(self, touch):
-        if touch.location in play_btn_rect:
+        if touch.location in self.play_btn_rect:
             main_scene.switch_scene('#Game Scene Here')
-        elif touch.location in char_btn_rect:
+        elif touch.location in self.char_btn_rect:
             main_scene.switch_scene('#Character Select Scene Here')
 
 class MultiScene (scene.Scene):
