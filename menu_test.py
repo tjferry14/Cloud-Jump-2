@@ -1,18 +1,14 @@
 import scene, sound
 
-player_name = 'TJ'
 MENU_FONT = 'AvenirNext-Heavy'
 BUTTON_FONT = 'Arial-BoldMT'
+player_name = 'TJ'
 game_character = 'Boy'
 
 class Start (scene.Scene):
     def draw(self):
-        center = self.bounds.center()
         portrait = self.size.h > self.size.w
-        #landscape = self.size.w > self.size.h
         scene.background(0.40, 0.80, 1.00) # light blue background color
-
-        scene.fill(0.50, 1.00, 0.00) # play button fill color
 
         if portrait:
             self.play_btn_rect = scene.Rect(200, 358, 600, 100)
@@ -21,6 +17,7 @@ class Start (scene.Scene):
             self.play_btn_rect = scene.Rect( 20, 358, 350, 100)
             self.char_btn_rect = scene.Rect( 20, 485, 230, 100)
         
+        scene.fill(0.50, 1.00, 0.00) # play button fill color
         scene.rect(*self.play_btn_rect)
         scene.fill(1.00, 1.00, 1.00) # character select button fill color
         scene.rect(*self.char_btn_rect)
@@ -47,15 +44,13 @@ class Start (scene.Scene):
 
     def touch_ended(self, touch):
         if touch.location in self.play_btn_rect:
-            main_scene.switch_scene(#Game Scene Here)
+            main_scene.switch_scene('#Game Scene Here')
         elif touch.location in self.char_btn_rect:
             main_scene.switch_scene('CharacterSelect1')
             
 class CharacterSelect1(scene.Scene):
 	def setup(self):
-		center = self.bounds.center()
 		portrait = self.size.h > self.size.w
-
 		if portrait:
 			self.p1_rect = scene.Rect(80, 735, 250, 250)
 			self.p2_rect = scene.Rect(400, 735, 250, 250)
@@ -82,48 +77,32 @@ class CharacterSelect1(scene.Scene):
 		scene.image('Mouse_Face', *self.p5_rect)
 		scene.image('Man', *self.p6_rect)
 
-	def check(self, x, y, posx, posy, sizex, sizey):
-		if x >= posx and x <= posx + sizex:
-			if y >= posy and y <= posy + sizey:
-				return True
-		return False
-
 	def touch_ended(self, touch):
-		x, y = touch.location
 		global game_character;
-
 		if touch.location in self.p1_rect:
 			game_character = 'Boy'
 			sound.play_effect('Ding_3')
-			main_scene.switch_scene(#Game Scene Here)
-
-		if touch.location in self.p2_rect:
+			main_scene.switch_scene('#Game Scene Here')
+		elif touch.location in self.p2_rect:
 			game_character = 'Girl'
 			sound.play_effect('Ding_3')
-			main_scene.switch_scene(#Game Scene Here)
-
-		if touch.location in self.p3_rect:
+			main_scene.switch_scene('#Game Scene Here')
+		elif touch.location in self.p3_rect:
 			game_character = 'Guardsman'
 			sound.play_effect('Ding_3')
-			main_scene.switch_scene(#Game Scene Here)
-
-		if touch.location in self.p4_rect:
+			main_scene.switch_scene('#Game Scene Here')
+		elif touch.location in self.p4_rect:
 			game_character = 'Hamster_Face'
 			sound.play_effect('Ding_3')
-			main_scene.switch_scene(#Game Scene Here)
-
-		if touch.location in self.p5_rect:
+			main_scene.switch_scene('#Game Scene Here')
+		elif touch.location in self.p5_rect:
 			game_character = 'Mouse_Face'
 			sound.play_effect('Ding_3')
-			main_scene.switch_scene(#Game Scene Here)
-
-		if touch.location in self.p6_rect:
+			main_scene.switch_scene('#Game Scene Here')
+		elif touch.location in self.p6_rect:
 			game_character = 'Man'
 			sound.play_effect('Ding_3')
-			main_scene.switch_scene(#Game Scene Here)
-
-		else:
-			pass
+			main_scene.switch_scene('#Game Scene Here')
 
 class MultiScene (scene.Scene):
     def __init__(self, start_scene):
