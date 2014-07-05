@@ -35,6 +35,7 @@ class Cloud(scene.Layer):
         if parent:
             parent.add_layer(self)
         self.image = scene.load_pil_image(cloud_image)
+        self.background = scene.Color(1, 0, 1)  # shows cloud rect problem
 
 class MyScene(scene.Scene):
     def __init__(self):
