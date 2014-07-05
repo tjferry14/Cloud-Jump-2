@@ -37,22 +37,21 @@ class Cloud(scene.Layer):
         self.image = scene.load_pil_image(cloud_image)
 
 class MyScene(scene.Scene):
+    def __init__(self):
+        scene.run(self)
 
     def setup(self):
         self.cloud = Cloud(self)
-        self.cloud.frame.x = self.bounds.w * 0.5
-        self.cloud.frame.y = self.bounds.h*0.8
+        self.cloud.frame.center(self.bounds.center())
 
     def draw(self):
         scene.background(0.40, 0.80, 1.00)
         self.root_layer.update(self.dt)
         self.root_layer.draw()
-        scene.rect(*self.cloud.frame)
+        #scene.rect(*self.cloud.frame)
 
     def touch_began(self, touch):
         self.root_layer.remove_layer(self.cloud)
-        self.cloud = Cloud(self)
-        self.cloud.frame.x = self.bounds.w * 0.5
-        self.cloud.frame.y = self.bounds.h*0.8
+        self.setup()
 
-scene.run(MyScene())
+MyScene()
