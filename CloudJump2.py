@@ -1,4 +1,5 @@
 import console, Image, ImageDraw, json, math, os, random, scene, sound, time
+import numpy as np
 
 DEAD_ZONE =  0.02
 DIFFICULTY_Q = 100000.0
@@ -46,35 +47,6 @@ def shadow_text(s, x, y):
 def score_text(s, x, y):
     tinted_text(s, x, y, scene.Color(1.0, 1.0, 0.4))
 
-def generate_shapes(num_circles):
-    shapes = []
-    for i in xrange(num_circles):
-        x = (i * 20 - ((num_circles/2)*30))+90
-        y = ((random.random()-0.5) * 30)+15
-        rad = random.randint(50, 100)
-        shapes.append([x, y, rad])
-    return shapes
-
-def draw_cloud(draw):
-    num_circles = random.randint(5, 6)
-    circles = generate_shapes(num_circles)
-    for i in circles:
-        r = i[2]
-        bbox = (i[0], 40-i[1], i[0]+r, 40-i[1]+r)
-        draw.ellipse(bbox, fill='rgb(90%,90%,90%)')
-    for i in circles:
-        r = i[2]
-        bbox = (i[0], 40-i[1]-10, i[0]+r, 40-i[1]+r-10)
-        draw.ellipse(bbox, fill='white')
-
-def cloud_maker():
-    image_size = (220, 140)
-    theImage = Image.new('RGBA', image_size) #, 'pink')
-    draw = ImageDraw.Draw(theImage)
-    draw_cloud(draw)
-    del draw
-    return theImage
-
 def pil_rect_to_scene_rect(pil_rect = (1, 2, 3 ,4)):
     if pil_rect:
         l, t, r, b = pil_rect
@@ -105,11 +77,57 @@ class Enemy(Sprite):
 
 class Cloud(Sprite):
     def __init__(self, rect = scene.Rect(), parent = None):
-        cloud_image = cloud_maker()
-        rect = pil_rect_to_scene_rect(cloud_image.getbbox())
-        rect.x = rect.y = 0
+        cloud_image = self.cloud_maker()
+        new_rect = pil_rect_to_scene_rect(cloud_image.getbbox())
+        rect.w, rect.h = new_rect.w, new_rect.h
         super(self.__class__, self).__init__(rect, parent, scene.load_pil_image(cloud_image))
         #self.background = scene.Color(1, 0, 1)  # show cloud rect problem
+
+    @classmethod
+    def generate_shapes(cls, num_circles):
+        shapes = []
+        for i in xrange(num_circles):
+            x = (i * 20 - ((num_circles/2)*30))+90
+            y = ((random.random()-0.5) * 30)+15
+            rad = random.randint(50, 100)
+            shapes.append([x, y, rad])
+        return shapes
+
+    @classmethod
+    def draw_cloud(cls, draw):
+        num_circles = random.randint(5, 6)
+        circles = cls.generate_shapes(num_circles)
+        for i in circles:
+            r = i[2]
+            bbox = (i[0], 40-i[1], i[0]+r, 40-i[1]+r)
+            draw.ellipse(bbox, fill='rgb(90%,90%,90%)')
+        for i in circles:
+            r = i[2]
+            bbox = (i[0], 40-i[1]-10, i[0]+r, 40-i[1]+r-10)
+            draw.ellipse(bbox, fill='white')
+
+    # found on 'http://stackoverflow.com/questions/14211340/automatically-cropping-an-image-with-python-pil'
+    @classmethod
+    def crop_image(cls, img):
+        image_data = np.asarray(img)
+        image_data_bw = image_data.max(axis=2)
+        non_empty_columns = np.where(image_data_bw.max(axis=0)>0)[0]
+        non_empty_rows    = np.where(image_data_bw.max(axis=1)>0)[0]
+        crop_box = (min(non_empty_rows),    max(non_empty_rows),
+                    min(non_empty_columns), max(non_empty_columns))
+        image_data_new = image_data[crop_box[0]:crop_box[1]+1,
+                                    crop_box[2]:crop_box[3]+1, :]
+        img = Image.fromarray(image_data_new)
+        return img
+
+    @classmethod
+    def cloud_maker(cls):
+        image_size = (220, 140)
+        img = Image.new('RGBA', image_size)
+        draw = ImageDraw.Draw(img)
+        cls.draw_cloud(draw)
+        del draw
+        return cls.crop_image(img)
 
 class MyScene(scene.Scene):
     def __init__(self):
@@ -130,15 +148,16 @@ class MyScene(scene.Scene):
             min_dist = int(MAX_CLOUD_DIST * q / DIFFICULTY_Q)
             max_dist = int(MAX_CLOUD_DIST / 2 + min_dist / 2)
             self.cloud_height += random.randint(min_dist, max_dist)
-            cloud = Cloud(None, self)
-            cloud.frame.x = random.random() * (self.bounds.w - 150)
-            cloud.frame.y = self.cloud_height
+            rect = scene.Rect(random.random() * (self.bounds.w - 150),
+                              self.cloud_height, 0, 0)
+            cloud = Cloud(rect, self)
+            #cloud.frame.x = random.random() * (self.bounds.w - 150)
+            #cloud.frame.y = self.cloud_height
             if random.random() < ENEMY_DENSITY:
                 #generate new enemy
                 rect = scene.Rect(0, 0, 64, 64)
                 rect.center(cloud.frame.center())
-                rect.y = cloud.frame.top() - 8
-                #rect.y += 40
+                rect.y = cloud.frame.top() - 15
                 Enemy(rect, self)
 
     def cull_scenery(self):
@@ -189,7 +208,8 @@ class MyScene(scene.Scene):
     def collision_detect(self):
         bounce = False
         if self.player.velocity < 0:
-            p = scene.Point(self.player.frame.center().x, self.player.frame.y - 10)
+            #p = scene.Point(self.player.frame.center().x, self.player.frame.y - 10)
+            p = self.player.frame.center()
             for sublayer in self.root_layer.sublayers:
                 if (isinstance(sublayer, Enemy)
                 and self.player.frame.intersects(sublayer.frame)):
