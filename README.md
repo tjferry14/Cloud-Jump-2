@@ -1,7 +1,7 @@
 Cloud Jump 2
 ================
 
-Expanding on the original [Cloud Jump][1] created by [BashedCrab][2]. Special thanks to [cclauss][3], [jsbain][4], and [Sebastian] [5] for their contributions. 
+Expanding on the original [Cloud Jump][1] created by [BashedCrab][2]. Special thanks to [cclauss][3], [jsbain][4], and [SebastianJarsve] [5] for their contributions. 
 
 Additional completed features so far:
 ------
@@ -16,5 +16,5 @@ See the [repo's issue page][6] to find out what is being worked on and what will
 [2]: https://gist.github.com/BashedCrab
 [3]: https://github.com/cclauss
 [4]: https://github.com/jsbain
-[5]: https://omz-forums.appspot.com/user/Sebastian
+[5]: https://github.com/SebastianJarsve
 [6]: https://github.com/tjferry14/Cloud-Jump-2/issues/milestones
