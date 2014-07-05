@@ -1,17 +1,17 @@
-import console, json, math, os, random, scene, sound, time
+import console, Image, ImageDraw, json, math, os, random, scene, sound, time
 
-IMAGE_WIDTH = 100
 DEAD_ZONE =  0.02
-PLAYER_CONTROL_SPEED = 2000
-PLAYER_BOUNCE_VELOCITY = 1700
-PLAYER_INITIAL_BOUNCE = 1700
-MAX_CLOUD_DIST = 505
 DIFFICULTY_Q = 100000.0
+ENEMY_DENSITY = 0.2
+GAME_CHARACTER = 'Boy'
+GAME_FONT = 'AppleSDGothicNeo-Bold' # easier to change font later
 GAME_GRAVITY = 2000
 GAME_WAITING, GAME_PLAYING, GAME_DEAD = range(3)
-ENEMY_DENSITY = 0.2
-GAME_FONT = 'AppleSDGothicNeo-Bold' # easier to change font later
-GAME_CHARACTER = 'Boy'
+IMAGE_WIDTH = 100
+MAX_CLOUD_DIST = 505
+PLAYER_BOUNCE_VELOCITY = 1700
+PLAYER_CONTROL_SPEED = 2000
+PLAYER_INITIAL_BOUNCE = 1700
 USER_FILE = 'user.json'
 
 def get_username(file_name = USER_FILE):
@@ -46,8 +46,44 @@ def shadow_text(s, x, y):
 def score_text(s, x, y):
     tinted_text(s, x, y, scene.Color(1.0, 1.0, 0.4))
 
+def generate_shapes(num_circles):
+    shapes = []
+    for i in xrange(num_circles):
+        x = (i * 20 - ((num_circles/2)*30))+90
+        y = ((random.random()-0.5) * 30)+15
+        rad = random.randint(50, 100)
+        shapes.append([x, y, rad])
+    return shapes
+
+def draw_cloud(draw):
+    num_circles = random.randint(5, 6)
+    circles = generate_shapes(num_circles)
+    for i in circles:
+        r = i[2]
+        bbox = (i[0], 40-i[1], i[0]+r, 40-i[1]+r)
+        draw.ellipse(bbox, fill='rgb(90%,90%,90%)')
+    for i in circles:
+        r = i[2]
+        bbox = (i[0], 40-i[1]-10, i[0]+r, 40-i[1]+r-10)
+        draw.ellipse(bbox, fill='white')
+
+def cloud_maker():
+    image_size = (220, 140)
+    theImage = Image.new('RGBA', image_size) #, 'pink')
+    draw = ImageDraw.Draw(theImage)
+    draw_cloud(draw)
+    del draw
+    return theImage
+
+def pil_rect_to_scene_rect(pil_rect = (1, 2, 3 ,4)):
+    if pil_rect:
+        l, t, r, b = pil_rect
+        return scene.Rect(l, t, r-l, b-t)
+    else:
+        return scene.Rect()
+
 class Sprite(scene.Layer):
-    def __init__(self, rect = scene.Rect(), parent = None, image_name = 'PC_Grass_Block'):
+    def __init__(self, rect = scene.Rect(), parent = None, image_name = 'Boy'):
         super(Sprite, self).__init__(rect)
         if parent:
             parent.add_layer(self)
@@ -67,38 +103,13 @@ class Enemy(Sprite):
         super(self.__class__, self).__init__(rect, parent, 'Alien_Monster')
         self.tint = scene.Color(1, 0, 1)
 
-class Cloud(object):
-    def __init__(self):
-        self.shapes = []
-
-        num_circles = random.randint(4, 5)
-        for i in xrange(num_circles):
-            x = i * 20 - ((num_circles/2)*30)
-            y = (random.random()-0.5) * 30
-            rad = random.randint(50, 100)
-            self.shapes.append([x, y, rad])
-
-        self.width = num_circles * 30 + 30
-        self.frame = scene.Rect(0, 0, self.width, 60)
-
-    def is_colliding(self, pos):
-        startp = self.frame.x - self.width/2
-        endp   = self.frame.x + self.width/2
-        return (startp < pos.x < endp
-        and self.frame.y + 10 < pos.y < self.frame.y + 30)
-
-    def draw(self):
-        scene.push_matrix()
-        scene.translate(self.frame.x, self.frame.y)
-        scene.no_stroke()
-        scene.fill(0.90, 0.90, 0.90)
-        for i in self.shapes:
-            scene.ellipse(i[0], i[1] - 5, i[2], i[2])
-
-        scene.fill(1.00, 1.00, 1.00)
-        for i in self.shapes:
-            scene.ellipse(i[0], i[1] + 5, i[2], i[2])
-        scene.pop_matrix()
+class Cloud(Sprite):
+    def __init__(self, rect = scene.Rect(), parent = None):
+        cloud_image = cloud_maker()
+        rect = pil_rect_to_scene_rect(cloud_image.getbbox())
+        rect.x = rect.y = 0
+        super(self.__class__, self).__init__(rect, parent, scene.load_pil_image(cloud_image))
+        #self.background = scene.Color(1, 0, 1)  # show cloud rect problem
 
 class MyScene(scene.Scene):
     def __init__(self):
@@ -119,21 +130,18 @@ class MyScene(scene.Scene):
             min_dist = int(MAX_CLOUD_DIST * q / DIFFICULTY_Q)
             max_dist = int(MAX_CLOUD_DIST / 2 + min_dist / 2)
             self.cloud_height += random.randint(min_dist, max_dist)
-            cloud = Cloud()
+            cloud = Cloud(None, self)
             cloud.frame.x = random.random() * (self.bounds.w - 150)
             cloud.frame.y = self.cloud_height
-            self.scenery.append(cloud)
             if random.random() < ENEMY_DENSITY:
                 #generate new enemy
                 rect = scene.Rect(0, 0, 64, 64)
                 rect.center(cloud.frame.center())
-                #rect.x += 20
+                rect.y = cloud.frame.top() - 8
+                #rect.y += 40
                 Enemy(rect, self)
 
     def cull_scenery(self):
-        for sprite in self.scenery:
-            if sprite.frame.top() < 0:
-                self.scenery.remove(sprite)
         for sublayer in self.root_layer.sublayers:
             if sublayer.frame.top() < 0:
                 self.root_layer.remove_layer(sublayer)
@@ -144,19 +152,22 @@ class MyScene(scene.Scene):
         if abs(tilt) > DEAD_ZONE:
             move = self.dt * tilt * PLAYER_CONTROL_SPEED
             self.player.frame.x += move
-            if self.player.frame.x < 0:
-                self.player.frame.x = 0
-            elif self.player.frame.x > self.bounds.w - self.player.frame.w:
-                self.player.frame.x = self.bounds.w - self.player.frame.w
+            x = self.player.frame.x
+            self.player.frame.x = max(x, 0)
+            self.player.frame.x = min(x, self.bounds.w - self.player.frame.w)
 
     def lower_scenery(self, y):
         self.climb += y
         self.cloud_height -= y
-        for sprite in self.scenery:
-            sprite.frame.y -= y
         for sublayer in self.root_layer.sublayers:
             if sublayer is not self.player:
                 sublayer.frame.y -= y
+
+    def end_game(self):
+        self.game_state = GAME_DEAD
+        for sublayer in self.root_layer.sublayers:
+            sublayer.frame.y = -500
+        self.generate_clouds()
 
     def run_gravity(self):
         global enemy_frame
@@ -171,28 +182,25 @@ class MyScene(scene.Scene):
             scenery_y_move = self.player.frame.y - self.player_max_y
             self.player.frame.y = self.player_max_y
             self.lower_scenery(scenery_y_move)
-        elif self.player.frame.top() < 0 :
-            self.game_state = GAME_DEAD
+        elif self.player.frame.top() < 0:
             sound.play_effect('Crashing')
+            self.end_game()
 
     def collision_detect(self):
         bounce = False
         if self.player.velocity < 0:
+            p = scene.Point(self.player.frame.center().x, self.player.frame.y - 10)
             for sublayer in self.root_layer.sublayers:
                 if (isinstance(sublayer, Enemy)
                 and self.player.frame.intersects(sublayer.frame)):
-                    self.game_state = GAME_DEAD
-                    for sublayer in self.root_layer.sublayers:
-                        sublayer.frame.y = -500
                     sound.play_effect('Powerup_1')
+                    self.end_game()
                     return True  # player was killed
-            p = scene.Point(self.player.frame.center().x, self.player.frame.y)
-            for sprite in self.scenery:
-                collision = p in sprite.frame
-                if collision:
-                    self.player.velocity = PLAYER_BOUNCE_VELOCITY
-                    sound.play_effect('Boing_1')
-                    break
+                elif isinstance(sublayer, Cloud) and p in sublayer.frame:
+                    bounce = True
+        if bounce:
+            self.player.velocity = PLAYER_BOUNCE_VELOCITY
+            sound.play_effect('Boing_1')
         return False  # player was not killed
 
     def game_loop(self):
@@ -226,13 +234,13 @@ class MyScene(scene.Scene):
                 time.sleep(0.3)
 
     def draw_text(self):
-        score = int(self.climb / 10)
-        s = 'Score: {}'.format(score)
         x = self.bounds.center().x
+        score = int(self.climb / 10)
+        score_text = 'Score: {}'.format(score)
         if self.game_state == GAME_PLAYING:
-            shadow_text(s, x, self.bounds.h * 0.95)
+            shadow_text(score_text, x, self.bounds.h * 0.95)
         elif self.game_state == GAME_DEAD:
-            shadow_text(s, x, self.bounds.h * 0.95)
+            shadow_text(score_text, x, self.bounds.h * 0.95)
             shadow_text('Game Over', x, self.bounds.h * 0.6)
             shadow_text('Tap to Play Again', x, self.bounds.h * 0.4)
             self.high_score(player_name, score)
@@ -243,7 +251,6 @@ class MyScene(scene.Scene):
     def setup(self):
         self.game_state = GAME_WAITING
         self.climb = 0
-        self.scenery = []
         ground_level = self.create_ground(12)
         self.cloud_height = 200
         self.generate_clouds()
@@ -260,8 +267,6 @@ class MyScene(scene.Scene):
         scene.background(0.40, 0.80, 1.00)
         self.root_layer.update(self.dt)
         self.root_layer.draw()
-        for sprite in self.scenery:
-            sprite.draw()
         self.draw_text()
 
     def touch_began(self, touch):
