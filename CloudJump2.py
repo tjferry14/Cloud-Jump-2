@@ -171,9 +171,9 @@ class MyScene(scene.Scene):
         if abs(tilt) > DEAD_ZONE:
             move = self.dt * tilt * PLAYER_CONTROL_SPEED
             self.player.frame.x += move
-            x = self.player.frame.x
-            self.player.frame.x = max(x, 0)
-            self.player.frame.x = min(x, self.bounds.w - self.player.frame.w)
+            self.player.frame.x = max(self.player.frame.x, 0)
+            self.player.frame.x = min(self.player.frame.x,
+                                      self.bounds.w - self.player.frame.w)
 
     def lower_scenery(self, y):
         self.climb += y
