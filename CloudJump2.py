@@ -15,6 +15,41 @@ PLAYER_CONTROL_SPEED = 2000
 PLAYER_INITIAL_BOUNCE = 1700
 USER_FILE = 'user.json'
 
+# === imported from HighScores.py ===
+
+import pickle
+
+class HighScores(object):
+    def __init__(self, in_file_name = 'highscores'):
+        self.file_name = in_file_name
+        if not self.file_name.endswith('.pkl'):
+            self.file_name += '.pkl'
+        self.high_scores = self.__load_scores()
+
+    def __load_scores(self):  # private function
+        try:
+            with open(self.file_name, 'rb') as in_file:
+                return pickle.load(in_file)
+        except IOError:
+            return {}
+
+    def __save_scores(self):  # private function
+        with open(self.file_name, 'wb') as out_file:
+            pickle.dump(self.high_scores, out_file)
+
+    def is_high_score(self, name, score):
+        try:
+            curr_high_score = self.high_scores.get(name, score-1)
+        except TypeError:
+            raise TypeError('The score arguement must be a number.')
+        is_new_high_score = score > curr_high_score
+        if is_new_high_score:
+            self.high_scores[name] = score
+            self.__save_scores()
+        return is_new_high_score
+
+# === end import from HighScores.py ===
+
 def get_username(file_name = USER_FILE):
     player_name = None
     if os.path.isfile(file_name):
@@ -60,11 +95,17 @@ class Sprite(scene.Layer):
         if parent:
             parent.add_layer(self)
         self.image = image_name
+        self.velocity = scene.Point(0, 0)
+
+    def update(self, dt):  # make the clouds blow in the wind?
+        #print(self.frame.x, dt, self.velocity.x)
+        self.frame.x += dt * self.velocity.x
+        self.frame.y += dt * self.velocity.y
 
 class Player(Sprite):
     def __init__(self, rect = scene.Rect(), parent = None):
         super(self.__class__, self).__init__(rect, parent, GAME_CHARACTER)
-        self.velocity = 0
+        #self.velocity = 0
 
 class GrassBlock(Sprite):
     def __init__(self, rect = scene.Rect(), parent = None):
@@ -81,7 +122,7 @@ class Cloud(Sprite):
         new_rect = pil_rect_to_scene_rect(cloud_image.getbbox())
         rect.w, rect.h = new_rect.w, new_rect.h
         super(self.__class__, self).__init__(rect, parent, scene.load_pil_image(cloud_image))
-        #self.background = scene.Color(1, 0, 1)  # show cloud rect problem
+        self.velocity.x = random.randint(-1, 1) * 50
 
     @classmethod
     def generate_shapes(cls, num_circles):
@@ -151,14 +192,13 @@ class MyScene(scene.Scene):
             rect = scene.Rect(random.random() * (self.bounds.w - 150),
                               self.cloud_height, 0, 0)
             cloud = Cloud(rect, self)
-            #cloud.frame.x = random.random() * (self.bounds.w - 150)
-            #cloud.frame.y = self.cloud_height
             if random.random() < ENEMY_DENSITY:
                 #generate new enemy
                 rect = scene.Rect(0, 0, 64, 64)
                 rect.center(cloud.frame.center())
                 rect.y = cloud.frame.top() - 15
-                Enemy(rect, self)
+                enemy = Enemy(rect, self)
+                enemy.velocity = cloud.velocity
 
     def cull_scenery(self):
         for sublayer in self.root_layer.sublayers:
@@ -184,19 +224,26 @@ class MyScene(scene.Scene):
 
     def end_game(self):
         self.game_state = GAME_DEAD
+        self.player.velocity.y = 0
+        score = int(self.climb / 10)
+        if self.high_scores.is_high_score(player_name, score):
+            fmt = 'Congratulations {}:\nYou have a new high score!'
+            self.high_score_msg = fmt.format(player_name)
+            for i in xrange(4):
+                sound.play_effect('Hit_{}'.format(i+1))
+                time.sleep(0.3)
         for sublayer in self.root_layer.sublayers:
             sublayer.frame.y = -500
         self.generate_clouds()
 
     def run_gravity(self):
-        global enemy_frame
-        player_y_move = self.dt * self.player.velocity
+        player_y_move = self.dt * self.player.velocity.y
         scenery_y_move = 0
-        old_velocity = self.player.velocity
-        self.player.velocity -= self.dt * GAME_GRAVITY
-        if old_velocity > 0 and self.player.velocity <= 0:
+        old_velocity_y = self.player.velocity.y
+        self.player.velocity.y -= self.dt * GAME_GRAVITY
+        if old_velocity_y > 0 and self.player.velocity.y <= 0:
             self.player_apex_frame = True
-        self.player.frame.y += player_y_move
+        #self.player.frame.y += player_y_move
         if self.player.frame.y >= self.player_max_y :
             scenery_y_move = self.player.frame.y - self.player_max_y
             self.player.frame.y = self.player_max_y
@@ -207,19 +254,18 @@ class MyScene(scene.Scene):
 
     def collision_detect(self):
         bounce = False
-        if self.player.velocity < 0:
-            #p = scene.Point(self.player.frame.center().x, self.player.frame.y - 10)
+        if self.player.velocity.y < 0:
             p = self.player.frame.center()
             for sublayer in self.root_layer.sublayers:
-                if (isinstance(sublayer, Enemy)
-                and self.player.frame.intersects(sublayer.frame)):
-                    sound.play_effect('Powerup_1')
-                    self.end_game()
-                    return True  # player was killed
-                elif isinstance(sublayer, Cloud) and p in sublayer.frame:
-                    bounce = True
+                if self.player.frame.center() in sublayer.frame:
+                    if isinstance(sublayer, Enemy):
+                        sound.play_effect('Powerup_1')
+                        self.end_game()
+                        return True  # player was killed
+                    elif isinstance(sublayer, Cloud):
+                        bounce = True
         if bounce:
-            self.player.velocity = PLAYER_BOUNCE_VELOCITY
+            self.player.velocity.y = PLAYER_BOUNCE_VELOCITY
             sound.play_effect('Boing_1')
         return False  # player was not killed
 
@@ -233,46 +279,31 @@ class MyScene(scene.Scene):
                 self.generate_clouds()
                 self.player_apex_frame = False
 
-    def high_score(self, name, score):
-        file_name = 'highscores.json'
-        high_scores = {}
-
-        try:
-            with open(file_name) as in_file:
-                high_scores = json.load(in_file)
-        except IOError:
-            pass
-
-        curr_high_score = high_scores.get(name, score - 1)
-        if score >= curr_high_score:
-            high_scores[name] = score
-            score_text('NEW HIGH SCORE!', self.bounds.w / 2, self.bounds.h * 0.75)
-            with open(file_name, 'w') as out_file:
-                json.dump(high_scores, out_file)
-            for i in xrange(3):
-                sound.play_effect('Hit_3')
-                time.sleep(0.3)
-
     def draw_text(self):
         x = self.bounds.center().x
         score = int(self.climb / 10)
-        score_text = 'Score: {}'.format(score)
+        score_as_text = 'Score: {}'.format(score)
         if self.game_state == GAME_PLAYING:
-            shadow_text(score_text, x, self.bounds.h * 0.95)
+            shadow_text(score_as_text, x, self.bounds.h * 0.95)
         elif self.game_state == GAME_DEAD:
-            shadow_text(score_text, x, self.bounds.h * 0.95)
+            shadow_text(score_as_text, x, self.bounds.h * 0.95)
+            if self.high_score_msg:
+                #print(self.high_score_msg)
+                #print(score_text)
+                score_text(self.high_score_msg, x, self.bounds.h * 0.75)
             shadow_text('Game Over', x, self.bounds.h * 0.6)
             shadow_text('Tap to Play Again', x, self.bounds.h * 0.4)
-            self.high_score(player_name, score)
         elif self.game_state == GAME_WAITING:
             shadow_text('Tap Screen to Start',  x, self.bounds.h * 0.6)
             shadow_text('Tilt Screen to Steer', x, self.bounds.h * 0.4)
 
     def setup(self):
-        self.game_state = GAME_WAITING
         self.climb = 0
-        ground_level = self.create_ground(12)
         self.cloud_height = 200
+        self.game_state = GAME_WAITING
+        self.high_scores = HighScores('CloudJump2 high scores')
+        self.high_score_msg = None
+        ground_level = self.create_ground(12)
         self.generate_clouds()
         
         rect = scene.Rect(0, 0, IMAGE_WIDTH, IMAGE_WIDTH)
@@ -292,7 +323,7 @@ class MyScene(scene.Scene):
     def touch_began(self, touch):
         if self.game_state == GAME_WAITING:
             self.game_state = GAME_PLAYING
-            self.player.velocity = PLAYER_INITIAL_BOUNCE
+            self.player.velocity.y = PLAYER_INITIAL_BOUNCE
         elif self.game_state == GAME_DEAD:
             self.setup()
 
