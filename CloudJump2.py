@@ -1,4 +1,4 @@
-import console, Image, ImageDraw, json, math, os, random, scene, sound, time
+import console, Image, ImageDraw, pickle, math, os, random, scene, sound, time
 import numpy as np
 
 DEAD_ZONE =  0.02
@@ -13,11 +13,9 @@ MAX_CLOUD_DIST = 505
 PLAYER_BOUNCE_VELOCITY = 1700
 PLAYER_CONTROL_SPEED = 2000
 PLAYER_INITIAL_BOUNCE = 1700
-USER_FILE = 'user.json'
+USER_FILE = 'user.txt'
 
 # === imported from HighScores.py ===
-
-import pickle
 
 class HighScores(object):
     def __init__(self, in_file_name = 'highscores'):
