@@ -48,7 +48,7 @@ class Player(Sprite):
             sound.play_effect('Hit_{}'.format(i+1))
             time.sleep(0.5)
         global player_is_really_dead
-        # The following is an infinate loop because
+        # The following is an infinite loop because
         # my_completion_routine() never gets called.
         #while not player_is_really_dead:
         #    time.sleep(1)
