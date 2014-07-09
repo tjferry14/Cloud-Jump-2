@@ -1,9 +1,9 @@
 # Etude on Player Death - http://en.m.wikipedia.org/wiki/etude
 # The player needs to die with more panache to give our game an
-# arcade feel.  we could use your help on bot the sounds and the
+# arcade feel.  We could use your help on bot the sounds and the
 # animations around the Player.die() method.  Better noises and 
 # a player the shrinks to almost nothing and then is replace
-# with a puff of somke would be super cool. Thanks for playing!
+# with a puff of smoke would be super cool. Thanks for playing!
 
 import scene, sound, time
 
