@@ -45,9 +45,9 @@ class Player(Sprite):
         for i in xrange(4):
             sound.play_effect('Hit_{}'.format(i+1))
             time.sleep(0.5)
-        while self.superlayer:
-            time.sleep(1)
-        print('Done')
+        #while self.superlayer:
+        #    time.sleep(1)
+        #print('Done')
         #del self  # suicide is not an tenable option
 
 class MyScene(scene.Scene):
