@@ -1,13 +1,11 @@
 # Etude on Player Death - http://en.m.wikipedia.org/wiki/etude
 # The player needs to die with more panache to give our game an
-# arcade feel.  We could use your help on bot the sounds and the
+# arcade feel.  We could use your help on both the sounds and the
 # animations around the Player.die() method.  Better noises and 
-# a player the shrinks to almost nothing and then is replace
+# a player that shrinks to almost nothing and then is replaced
 # with a puff of smoke would be super cool. Thanks for playing!
 
 import scene, sound, time
-
-player_is_really_dead = False
 
 def tinted_text(s, x, y, tint_color = scene.Color(0, 0, 1)):
     font_name = 'AppleSDGothicNeo-Bold'
@@ -28,42 +26,29 @@ class Sprite(scene.Layer):
         self.velocity = scene.Point(0, 0)
 
     def update(self, dt):
+        super(Sprite, self).update(dt)
         self.frame.x += dt * self.velocity.x
         self.frame.y += dt * self.velocity.y
-
-def my_completion_routine():
-    print('This text never gets printed.')
-    global player_is_really_dead
-    player_is_really_dead = True
 
 class Player(Sprite):
     def __init__(self, rect = scene.Rect(), parent = None):
         super(self.__class__, self).__init__(rect, parent, 'Boy')
-        global player_is_really_dead
-        player_is_really_dead = False
+
+    def death_completion(self):
+        self.superlayer.remove_layer(self)
+        self.superlayer = None
 
     def die(self):
-        self.animate('scale_x', 0.8, duration=1.0, completion=my_completion_routine)
+        self.animation_done = False
+        self.animate('scale_x', 0.01, repeat=2)
+        self.animate('scale_y', 0.01, repeat=2, completion=self.death_completion)
         for i in xrange(4):
             sound.play_effect('Hit_{}'.format(i+1))
             time.sleep(0.5)
-        global player_is_really_dead
-        # The following is an infinite loop because
-        # my_completion_routine() never gets called.
-        #while not player_is_really_dead:
+        #while self.superlayer:
         #    time.sleep(1)
-        self.superlayer.remove_layer(self)
+        #print('Done')
         #del self  # suicide is not an tenable option
-        #while min(self.frame.w, self.frame.h) > 0:
-        #    print('s', self.frame)
-        #    self.frame.x += 1
-        #    self.frame.y += 1
-        #    self.frame.w -= 2
-        #    self.frame.h -= 2
-        #    print('f', self.frame)
-        #    self.draw(a=1)
-        #    time.sleep(0.05)
-        #    assert False
 
 class MyScene(scene.Scene):
     def __init__(self):
