@@ -1,5 +1,4 @@
-import console, Image, ImageDraw, pickle, math, os, random, scene, sound, time
-import numpy as np
+import console, Image, ImageDraw, math, numpy, os, pickle, random, scene, sound, time
 
 DEAD_ZONE =  0.02
 DIFFICULTY_Q = 100000.0
@@ -19,9 +18,10 @@ USER_FILE = 'user.txt'
 
 class HighScores(object):
     def __init__(self, in_file_name = 'highscores'):
+        file_ext = '.pkl'
         self.file_name = in_file_name
-        if not self.file_name.endswith('.pkl'):
-            self.file_name += '.pkl'
+        if not self.file_name.endswith(file_ext):
+            self.file_name += file_ext
         self.high_scores = self.__load_scores()
 
     def __load_scores(self):  # private function
@@ -65,8 +65,8 @@ def get_username(file_name = USER_FILE):
 player_name = get_username()
 
 # to reduce latency, preload sound effects
-for s in 'Boing_1 Crashing Powerup_1'.split():
-    sound.load_effect(s)
+#for s in 'Boing_1 Crashing Hit1 Hit2 Hit3 Hit4 Powerup_1'.split():
+#    sound.load_effect(s)
 
 def tinted_text(s, x, y, tint_color = scene.Color(0, 0, 1)):
     scene.tint(0, 0, 0)
@@ -96,14 +96,25 @@ class Sprite(scene.Layer):
         self.velocity = scene.Point(0, 0)
 
     def update(self, dt):  # make the clouds blow in the wind?
-        #print(self.frame.x, dt, self.velocity.x)
+        super(Sprite, self).update(dt)
         self.frame.x += dt * self.velocity.x
         self.frame.y += dt * self.velocity.y
 
 class Player(Sprite):
     def __init__(self, rect = scene.Rect(), parent = None):
         super(self.__class__, self).__init__(rect, parent, GAME_CHARACTER)
-        #self.velocity = 0
+
+    def death_completion(self):
+        self.superlayer.remove_layer(self)
+        self.superlayer = None
+
+    def die(self):
+        self.animate('scale_x', 0.01, repeat=2)
+        self.animate('scale_y', 0.01, repeat=2, completion=self.death_completion)
+        for i in xrange(4):
+            sound.play_effect('Hit_{}'.format(i+1))
+            time.sleep(0.5)
+        #del self  # suicide is not an tenable option
 
 class GrassBlock(Sprite):
     def __init__(self, rect = scene.Rect(), parent = None):
@@ -120,7 +131,10 @@ class Cloud(Sprite):
         new_rect = pil_rect_to_scene_rect(cloud_image.getbbox())
         rect.w, rect.h = new_rect.w, new_rect.h
         super(self.__class__, self).__init__(rect, parent, scene.load_pil_image(cloud_image))
-        self.velocity.x = random.randint(-1, 1) * 50
+        self.velocity.x = random.randint(-1, 4)  # give clouds a 2-in-6 chance to be moving
+        if self.velocity.x > 1:
+            self.velocity.x = 0
+        self.velocity.x *= 50
 
     @classmethod
     def generate_shapes(cls, num_circles):
@@ -148,10 +162,10 @@ class Cloud(Sprite):
     # found on 'http://stackoverflow.com/questions/14211340/automatically-cropping-an-image-with-python-pil'
     @classmethod
     def crop_image(cls, img):
-        image_data = np.asarray(img)
+        image_data = numpy.asarray(img)
         image_data_bw = image_data.max(axis=2)
-        non_empty_columns = np.where(image_data_bw.max(axis=0)>0)[0]
-        non_empty_rows    = np.where(image_data_bw.max(axis=1)>0)[0]
+        non_empty_columns = numpy.where(image_data_bw.max(axis=0)>0)[0]
+        non_empty_rows    = numpy.where(image_data_bw.max(axis=1)>0)[0]
         crop_box = (min(non_empty_rows),    max(non_empty_rows),
                     min(non_empty_columns), max(non_empty_columns))
         image_data_new = image_data[crop_box[0]:crop_box[1]+1,
@@ -201,7 +215,8 @@ class MyScene(scene.Scene):
     def cull_scenery(self):
         for sublayer in self.root_layer.sublayers:
             if sublayer.frame.top() < 0:
-                self.root_layer.remove_layer(sublayer)
+                sublayer.superlayer.remove_layer(sublayer)
+                #self.root_layer.remove_layer(sublayer)
                 del sublayer
 
     def control_player(self):
@@ -223,16 +238,19 @@ class MyScene(scene.Scene):
     def end_game(self):
         self.game_state = GAME_DEAD
         self.player.velocity.y = 0
+        self.player.die()
+        del self.player
+        self.player = None
         score = int(self.climb / 10)
         if self.high_scores.is_high_score(player_name, score):
             fmt = 'Congratulations {}:\nYou have a new high score!'
             self.high_score_msg = fmt.format(player_name)
             for i in xrange(4):
-                sound.play_effect('Hit_{}'.format(i+1))
+                sound.play_effect('Jump_{}'.format(i+1))
                 time.sleep(0.3)
-        for sublayer in self.root_layer.sublayers:
-            sublayer.frame.y = -500
-        self.generate_clouds()
+        #for sublayer in self.root_layer.sublayers:
+        #    sublayer.frame.y = -500
+        #self.generate_clouds()
 
     def run_gravity(self):
         player_y_move = self.dt * self.player.velocity.y
@@ -246,7 +264,8 @@ class MyScene(scene.Scene):
             scenery_y_move = self.player.frame.y - self.player_max_y
             self.player.frame.y = self.player_max_y
             self.lower_scenery(scenery_y_move)
-        elif self.player.frame.top() < 0:
+        elif self.player.frame.center().y < 0:
+            self.player.frame.y = 0
             sound.play_effect('Crashing')
             self.end_game()
 
@@ -259,18 +278,21 @@ class MyScene(scene.Scene):
                     if isinstance(sublayer, Enemy):
                         sound.play_effect('Powerup_1')
                         self.end_game()
-                        return True  # player was killed
+                        return  # player killed by collision
                     elif isinstance(sublayer, Cloud):
                         bounce = True
         if bounce:
             self.player.velocity.y = PLAYER_BOUNCE_VELOCITY
             sound.play_effect('Boing_1')
-        return False  # player was not killed
 
     def game_loop(self):
         if self.game_state == GAME_PLAYING:
             self.run_gravity()
+            if not self.player:
+                return  # player killed by gravity
             self.collision_detect()
+            if not self.player:
+                return  # player killed by collision
             self.control_player()
             if self.player_apex_frame:
                 self.cull_scenery()
@@ -288,7 +310,7 @@ class MyScene(scene.Scene):
             if self.high_score_msg:
                 #print(self.high_score_msg)
                 #print(score_text)
-                score_text(self.high_score_msg, x, self.bounds.h * 0.75)
+                score_text(self.high_score_msg, x, self.bounds.h * 0.78)
             shadow_text('Game Over', x, self.bounds.h * 0.6)
             shadow_text('Tap to Play Again', x, self.bounds.h * 0.4)
         elif self.game_state == GAME_WAITING:
