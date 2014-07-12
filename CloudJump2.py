@@ -1,4 +1,4 @@
-import console, Image, ImageDraw, math, numpy, os, pickle, random, scene, sound, time
+import console, Image, ImageDraw, math, numpy, os, pickle, random, scene, sound, threading, time
 
 DEAD_ZONE =  0.02
 DIFFICULTY_Q = 100000.0
@@ -63,10 +63,24 @@ def get_username(file_name = USER_FILE):
     return player_name or 'default'
 
 player_name = get_username()
+console.hud_alert('Player name: ' + player_name)
 
 # to reduce latency, preload sound effects
 #for s in 'Boing_1 Crashing Hit1 Hit2 Hit3 Hit4 Powerup_1'.split():
 #    sound.load_effect(s)
+
+def player_killed_sounds():
+    for i in xrange(4):
+        sound.play_effect('Hit_{}'.format(i+1))
+        time.sleep(0.5)
+
+def high_score_sounds():
+    for i in xrange(4):
+        sound.play_effect('Jump_{}'.format(i+1))
+        time.sleep(0.3)
+
+def run_in_thread(in_function):
+    threading.Thread(None, in_function).start()
 
 def tinted_text(s, x, y, tint_color = scene.Color(0, 0, 1)):
     scene.tint(0, 0, 0)
@@ -109,11 +123,9 @@ class Player(Sprite):
         self.superlayer = None
 
     def die(self):
-        self.animate('scale_x', 0.01, repeat=2)
-        self.animate('scale_y', 0.01, repeat=2, completion=self.death_completion)
-        for i in xrange(4):
-            sound.play_effect('Hit_{}'.format(i+1))
-            time.sleep(0.5)
+        run_in_thread(player_killed_sounds)
+        self.animate('scale_x', 0.01)
+        self.animate('scale_y', 0.01, completion=self.death_completion)
         #del self  # suicide is not an tenable option
 
 class GrassBlock(Sprite):
@@ -243,14 +255,10 @@ class MyScene(scene.Scene):
         self.player = None
         score = int(self.climb / 10)
         if self.high_scores.is_high_score(player_name, score):
+            console.hud_alert('New high score!')
+            run_in_thread(high_score_sounds)
             fmt = 'Congratulations {}:\nYou have a new high score!'
             self.high_score_msg = fmt.format(player_name)
-            for i in xrange(4):
-                sound.play_effect('Jump_{}'.format(i+1))
-                time.sleep(0.3)
-        #for sublayer in self.root_layer.sublayers:
-        #    sublayer.frame.y = -500
-        #self.generate_clouds()
 
     def run_gravity(self):
         player_y_move = self.dt * self.player.velocity.y
@@ -259,7 +267,6 @@ class MyScene(scene.Scene):
         self.player.velocity.y -= self.dt * GAME_GRAVITY
         if old_velocity_y > 0 and self.player.velocity.y <= 0:
             self.player_apex_frame = True
-        #self.player.frame.y += player_y_move
         if self.player.frame.y >= self.player_max_y :
             scenery_y_move = self.player.frame.y - self.player_max_y
             self.player.frame.y = self.player_max_y
