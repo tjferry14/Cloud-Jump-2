@@ -7,7 +7,7 @@ Special thanks to [cclauss][3], [jsbain][4], and [SebastianJarsve] [5] for their
 
 Additional completed features so far:
 ------
-* Sound Effects played in Threads when the Player:
+* Sound Effects played in Threads when the Player
         * bounces off a cloud
         * is killed
         * gets a new high score
