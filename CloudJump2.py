@@ -63,7 +63,7 @@ def get_username(file_name = USER_FILE):
     return player_name or 'default'
 
 player_name = get_username()
-console.hud_alert('Player name: ' + player_name)
+console.hud_alert('Player name: ' + player_name) # for debugging purposes
 
 # to reduce latency, preload sound effects
 #for s in 'Boing_1 Crashing Hit1 Hit2 Hit3 Hit4 Powerup_1'.split():
@@ -255,7 +255,7 @@ class MyScene(scene.Scene):
         self.player = None
         score = int(self.climb / 10)
         if self.high_scores.is_high_score(player_name, score):
-            console.hud_alert('New high score!')
+            console.hud_alert('New high score!') # for debugging purposes
             run_in_thread(high_score_sounds)
             fmt = 'Congratulations {}:\nYou have a new high score!'
             self.high_score_msg = fmt.format(player_name)
