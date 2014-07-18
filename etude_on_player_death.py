@@ -135,8 +135,6 @@ class MyScene(scene.Scene):
 	def draw_text(self):
 		x = self.bounds.center().x
 		h = self.bounds.h
-		msg = 'We could use your help.'
-		shadow_text(msg, x, h * 0.95)
 		msg = 'Tap to kill me...' if self.player else 'The player is dead!'
 		shadow_text(msg, x, h * 0.80)
 		msg = '''Issue #9: When killed, the player
