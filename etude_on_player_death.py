@@ -1,9 +1,8 @@
 # Etude on Player Death - http://en.m.wikipedia.org/wiki/etude
 # The player needs to die with more panache to give our game an
-# arcade feel.  We could use your help on both the sounds and the
-# animations around the Player.die() method.  Better noises and
-# a player that shrinks to almost nothing and then is replaced
-# with a puff of smoke would be super cool. Thanks for playing!
+# arcade feel.  We could use your help on
+# the sounds around the Player.die() method.  Better noises 
+# would be super cool. Thanks!
 
 import scene, sound, time, zipfile, urllib, cStringIO, Image
 
