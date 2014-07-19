@@ -1,10 +1,9 @@
 # Etude on Player Death - http://en.m.wikipedia.org/wiki/etude
 # The player needs to die with more panache to give our game an
-# arcade feel.  We could use your help on
-# the sounds around the Player.die() method.  Better noises
-# would be super cool. Thanks!
+# arcade feel.  We could use your help on the sounds around the
+# Player.die() method.  Better noises would be super cool. Thanks!
 
-import scene, sound, time, zipfile, urllib, cStringIO, Image
+import scene, sound, threading, time, zipfile, urllib, cStringIO, Image
 
 def tinted_text(s, x, y, tint_color = scene.Color(0, 0, 1)):
     font_name = 'AppleSDGothicNeo-Bold'
@@ -15,6 +14,14 @@ def tinted_text(s, x, y, tint_color = scene.Color(0, 0, 1)):
 
 def shadow_text(s, x, y):
     tinted_text(s, x, y, scene.Color(0.0, 0.5, 1.0))
+
+def player_killed_sounds():
+    for i in xrange(4):
+        sound.play_effect('Hit_{}'.format(i+1))
+        time.sleep(0.5)
+
+def run_in_thread(in_function):
+    threading.Thread(None, in_function).start()
 
 class AnimatedSprite (object):
     def __init__(self, images, frame, w=1, h=1, steps=3, **kwargs):
@@ -27,11 +34,12 @@ class AnimatedSprite (object):
             self.original_size = images[0].size
         else:
             self.tiles = [self.get_frame(images, x, y) for y in xrange(h) for x in xrange(w)]
-        self.step = 0
+        #self.step = 0
         self.frame_count = 0
-        self.steps = steps
-        self.rotation = 0
-        self.tint = scene.Color(1,1,1,1)
+        self.frames_per_image = steps
+        self.max_frames = len(self.tiles) * self.frames_per_image
+        #self.rotation = 0
+        #self.tint = scene.Color(1,1,1,1)
         self.looped = False
         self.is_done = False
         self.configure(**kwargs)
@@ -45,17 +53,9 @@ class AnimatedSprite (object):
         images = []
         zip_file = zipfile.ZipFile(cStringIO.StringIO(urllib.urlopen(url).read()))
         for name in zip_file.namelist():
-            if name.startswith(directory+starts_with):
+            if name.startswith(directory + '/' + starts_with):
                 images.append(Image.open(cStringIO.StringIO(zip_file.open(name).read())))
         return images
-
-    @classmethod
-    def white_to_transparent(self, img):
-        pixdata = img.load()
-        for y in xrange(img.size[1]):
-            for x in xrange(img.size[0]):
-                if pixdata[x, y] == (255, 255, 255, 255):
-                    pixdata[x, y] = (255, 255, 255, 0)
 
     def get_frame(self, img, x, y):
         w, h = img.size
@@ -65,26 +65,16 @@ class AnimatedSprite (object):
         self.original_size = frame.size
         return scene.load_pil_image(frame)
 
-    def set_original_size(self):
-        self.frame.w, self.frame.h = self.original_size
-
     def draw(self):
-        # tiles: list of 10 image tiles
-        # step:  index into tiles of the current image
-        # steps: number of times to show each tile before moving to the next tile
+        # tiles: list of image tiles
+        # frames_per_image: number of times to show each tile before moving to the next tile
         if not self.is_done:
-            self.step = self.frame_count / self.steps % len(self.tiles)
-            scene.push_matrix()
-            scene.translate(*self.frame.origin())
-            scene.rotate(self.rotation)
-            scene.tint(*self.tint)
-            scene.image(self.tiles[self.step], 0, 0, *self.frame.size())
-            scene.pop_matrix()
+            curr_tile = self.tiles[int(self.frame_count / self.frames_per_image)]
+            scene.image(curr_tile, *self.frame)
             self.frame_count += 1
-            max_frames = len(self.tiles) * self.steps
-            if self.frame_count >= max_frames:
+            if self.frame_count >= self.max_frames:
                 if self.looped:
-                    self.frame_count %= max_frames
+                    self.frame_count %= self.max_frames
                 else:
                     self.is_done = True
 
@@ -109,7 +99,7 @@ class Player(Sprite):
         self.superlayer.remove_layer(self)
         self.superlayer = None
 
-    def die(self):
+    def zdie(self):
         self.animation_done = False
         self.animate('scale_x', 0.01, repeat=2)
         self.animate('scale_y', 0.01, repeat=2, completion=self.death_completion)
@@ -117,18 +107,24 @@ class Player(Sprite):
             sound.play_effect('Hit_{}'.format(i+1))
             time.sleep(0.5)
 
+    def die(self):
+        run_in_thread(player_killed_sounds)
+        self.animate('scale_x', 0.01)
+        self.animate('scale_y', 0.01, completion=self.death_completion)
+        #del self  # suicide is not an tenable option
+        
 class MyScene(scene.Scene):
     def __init__(self):
         wimpy_smoke = False
         if wimpy_smoke:
             the_url = 'http://powstudios.com/system/files/smokes.zip'
-            self.smoke_images = AnimatedSprite.get_images_from_zip(the_url, 'smoke puff up/', 'smoke_puff')
-            self.smoke_steps = 5
+            self.smoke_images = AnimatedSprite.get_images_from_zip(the_url, 'smoke puff up', 'smoke_puff')
+            self.smoke_frames_per_image = 4
             self.smoke_w = 10
         else:  # awesome smoke
             the_url = 'https://dl.dropboxusercontent.com/u/25234596/Exp_type_C.png'
             self.smoke_images = Image.open(cStringIO.StringIO(urllib.urlopen(the_url).read()))
-            self.smoke_steps = 2
+            self.smoke_frames_per_image = 2
             self.smoke_w = 48
         scene.run(self)
 
@@ -158,7 +154,7 @@ class MyScene(scene.Scene):
         self.player = Player(rect, self)
 
         self.smoke = AnimatedSprite(self.smoke_images, scene.Rect(0, 0, 200, 200), w=self.smoke_w)
-        self.smoke.configure(steps=self.smoke_steps, looped=False, is_done=True, tint=scene.Color(1,1,1,0.6))
+        self.smoke.configure(steps=self.smoke_frames_per_image, looped=False, is_done=True, tint=scene.Color(1,1,1,0.6))
 
     def draw(self):
         scene.background(0.40, 0.80, 1.00)
