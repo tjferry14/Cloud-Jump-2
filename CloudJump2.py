@@ -13,7 +13,13 @@ MAX_CLOUD_DIST = 505
 PLAYER_BOUNCE_VELOCITY = 1700
 PLAYER_CONTROL_SPEED = 2000
 PLAYER_INITIAL_BOUNCE = 1700
-USER_FILE = 'user.txt'
+SCRIPT_NAME  = os.path.basename(__file__)[:-3]
+RESOURCE_DIR = __file__[:-3] + '_resources/'
+USER_FILE = RESOURCE_DIR + 'user.txt'
+try:
+    os.mkdir(RESOURCE_DIR)
+except OSError:
+    pass
 
 player_name = None
 urls = [ 'http://powstudios.com/system/files/smokes.zip',
@@ -22,9 +28,9 @@ urls = [ 'http://powstudios.com/system/files/smokes.zip',
 # === imported from HighScores.py ===
 
 class HighScores(object):
-    def __init__(self, in_file_name = 'highscores'):
+    def __init__(self, in_file_name = SCRIPT_NAME + ' high scores'):
         file_ext = '.pkl'
-        self.file_name = in_file_name
+        self.file_name = RESOURCE_DIR + in_file_name
         if not self.file_name.endswith(file_ext):
             self.file_name += file_ext
         self.high_scores = self.__load_scores()
@@ -56,12 +62,13 @@ class HighScores(object):
 def get_remote_resources(in_urls = urls):
     def url_to_local_file(in_url, in_file_name):
         #print('Downloading: {} --> {}'.format(in_url, in_file_name))
-        console.hud_alert('Downloading: ' + in_file_name)
+        short_name = in_file_name.rpartition('/')[2] or in_file_name
+        console.hud_alert('Downloading: ' + short_name)
         with open(in_file_name, 'w') as out_file:
             out_file.write(requests.get(in_url).content)
 
     for url in in_urls:
-        file_name = url.rpartition('/')[2] or url
+        file_name = RESOURCE_DIR + (url.rpartition('/')[2] or url)
         if not os.path.isfile(file_name):
             url_to_local_file(url, file_name)
 
@@ -384,18 +391,20 @@ class MyScene(scene.Scene):
 
     def setup_smoke(self):
         rect = scene.Rect(0, 0, 200, 200)
-        images = get_images_from_zip_file('smokes.zip', 'smoke puff up', 'smoke_puff')
+        file_name = RESOURCE_DIR + 'smokes.zip'
+        images = get_images_from_zip_file(file_name, 'smoke puff up', 'smoke_puff')
         self.smoke_normal = AnimatedSprite(rect, self, images, 8)
 
         rect = scene.Rect(0, 0, 200, 200)
-        images = slice_image_into_tiles(Image.open('Exp_type_C.png'), 48)
+        file_name = RESOURCE_DIR + 'Exp_type_C.png'
+        images = slice_image_into_tiles(Image.open(file_name), 48)
         self.smoke_special = AnimatedSprite(rect, self, images, 2)
 
     def setup(self):
         self.climb = 0
         self.cloud_height = 200
         self.game_state = GAME_WAITING
-        self.high_scores = HighScores('CloudJump2 high scores')
+        self.high_scores = HighScores()
         self.high_score_msg = None
         ground_level = self.create_ground(12)
         self.generate_clouds()
