@@ -1,4 +1,5 @@
-import console, Image, ImageDraw, math, numpy, os, pickle, random, scene, sound, threading, time
+import cStringIO, console, Image, ImageDraw, math, numpy, os, os.path
+import pickle, random, requests, scene, sound, threading, time, zipfile
 
 DEAD_ZONE =  0.02
 DIFFICULTY_Q = 100000.0
@@ -14,6 +15,10 @@ PLAYER_CONTROL_SPEED = 2000
 PLAYER_INITIAL_BOUNCE = 1700
 USER_FILE = 'user.txt'
 
+player_name = None
+urls = [ 'http://powstudios.com/system/files/smokes.zip',
+         'https://dl.dropboxusercontent.com/u/25234596/Exp_type_C.png' ]
+
 # === imported from HighScores.py ===
 
 class HighScores(object):
@@ -26,13 +31,13 @@ class HighScores(object):
 
     def __load_scores(self):  # private function
         try:
-            with open(self.file_name, 'rb') as in_file:
+            with open(self.file_name, 'r') as in_file:
                 return pickle.load(in_file)
         except IOError:
             return {}
 
     def __save_scores(self):  # private function
-        with open(self.file_name, 'wb') as out_file:
+        with open(self.file_name, 'w') as out_file:
             pickle.dump(self.high_scores, out_file)
 
     def is_high_score(self, name, score):
@@ -48,6 +53,18 @@ class HighScores(object):
 
 # === end import from HighScores.py ===
 
+def get_remote_resources(in_urls = urls):
+    def url_to_local_file(in_url, in_file_name):
+        #print('Downloading: {} --> {}'.format(in_url, in_file_name))
+        console.hud_alert('Downloading: ' + in_file_name)
+        with open(in_file_name, 'w') as out_file:
+            out_file.write(requests.get(in_url).content)
+
+    for url in in_urls:
+        file_name = url.rpartition('/')[2] or url
+        if not os.path.isfile(file_name):
+            url_to_local_file(url, file_name)
+
 def get_username(file_name = USER_FILE):
     player_name = None
     if os.path.isfile(file_name):
@@ -62,12 +79,19 @@ def get_username(file_name = USER_FILE):
                 f.write(player_name)
     return player_name or 'default'
 
-player_name = get_username()
-console.hud_alert('Player name: ' + player_name) # for debugging purposes
+def slice_image_into_tiles(in_image, img_count_h, img_count_v = 1):
+    w, h = in_image.size  # get the size of the big image
+    w /= img_count_h      # calculate the size of smaller images
+    h /= img_count_v
+    return [scene.load_pil_image(in_image.crop((x*w, y*h, (x+1)*w, (y+1)*h)))
+                for y in xrange(img_count_v) for x in xrange(img_count_h)]
 
-# to reduce latency, preload sound effects
-#for s in 'Boing_1 Crashing Hit1 Hit2 Hit3 Hit4 Powerup_1'.split():
-#    sound.load_effect(s)
+def get_images_from_zip_file(file_name, directory, starts_with):
+        with open(file_name) as in_file:
+            starts_with = directory + '/' + starts_with
+            zip_file = zipfile.ZipFile(in_file)
+            return [scene.load_pil_image(Image.open(cStringIO.StringIO(zip_file.open(name).read())))
+                    for name in zip_file.namelist() if name.startswith(starts_with)]
 
 def player_killed_sounds():
     for i in xrange(4):
@@ -114,6 +138,35 @@ class Sprite(scene.Layer):
         self.frame.x += dt * self.velocity.x
         self.frame.y += dt * self.velocity.y
 
+class AnimatedSprite(Sprite):
+    def __init__(self, rect, parent, in_images, in_frames_per_image, **kwargs):
+        super(self.__class__, self).__init__(rect, parent, in_images[0])
+        assert in_images and isinstance(in_images, list)
+        self.images = in_images
+        self.frames_per_image = in_frames_per_image
+        self.max_frames = len(in_images) * in_frames_per_image
+        self.frame_count = 0
+        self.looped = False
+        self.is_done = True
+        self.configure(**kwargs)
+
+    def configure(self, **kwargs):
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+    def update(self, dt):
+        super(AnimatedSprite, self).update(dt)
+        if self.is_done:
+            self.image = None 
+            return
+        self.image = self.images[int(self.frame_count / self.frames_per_image)]
+        self.frame_count += 1
+        if self.frame_count >= self.max_frames:
+            if self.looped:
+                self.frame_count %= self.max_frames
+            else:
+                self.is_done = True
+
 class Player(Sprite):
     def __init__(self, rect = scene.Rect(), parent = None):
         super(self.__class__, self).__init__(rect, parent, GAME_CHARACTER)
@@ -123,6 +176,7 @@ class Player(Sprite):
         self.superlayer = None
 
     def die(self):
+        self.frame.y = max(self.frame.y, 50)
         run_in_thread(player_killed_sounds)
         self.animate('scale_x', 0.01)
         self.animate('scale_y', 0.01, completion=self.death_completion)
@@ -228,7 +282,6 @@ class MyScene(scene.Scene):
         for sublayer in self.root_layer.sublayers:
             if sublayer.frame.top() < 0:
                 sublayer.superlayer.remove_layer(sublayer)
-                #self.root_layer.remove_layer(sublayer)
                 del sublayer
 
     def control_player(self):
@@ -244,21 +297,28 @@ class MyScene(scene.Scene):
         self.climb += y
         self.cloud_height -= y
         for sublayer in self.root_layer.sublayers:
-            if sublayer is not self.player:
+            if sublayer not in (self.player, self.smoke_normal, self.smoke_special):
                 sublayer.frame.y -= y
 
     def end_game(self):
         self.game_state = GAME_DEAD
-        self.player.velocity.y = 0
+        self.player.velocity = scene.Point(0, 0)
+        death_loc = self.player.frame.center()
+        death_loc.y = max(death_loc.y, 80)
         self.player.die()
         del self.player
         self.player = None
         score = int(self.climb / 10)
         if self.high_scores.is_high_score(player_name, score):
-            console.hud_alert('New high score!') # for debugging purposes
+            self.smoke_special.frame.center(death_loc)
+            self.smoke_special.configure(frame_count=0, is_done=False)
+            #console.hud_alert('New high score!') # for debugging purposes
             run_in_thread(high_score_sounds)
             fmt = 'Congratulations {}:\nYou have a new high score!'
             self.high_score_msg = fmt.format(player_name)
+        else:
+            self.smoke_normal.frame.center(death_loc)
+            self.smoke_normal.configure(frame_count=0, is_done=False)
 
     def run_gravity(self):
         player_y_move = self.dt * self.player.velocity.y
@@ -315,14 +375,21 @@ class MyScene(scene.Scene):
         elif self.game_state == GAME_DEAD:
             shadow_text(score_as_text, x, self.bounds.h * 0.95)
             if self.high_score_msg:
-                #print(self.high_score_msg)
-                #print(score_text)
                 score_text(self.high_score_msg, x, self.bounds.h * 0.78)
             shadow_text('Game Over', x, self.bounds.h * 0.6)
             shadow_text('Tap to Play Again', x, self.bounds.h * 0.4)
         elif self.game_state == GAME_WAITING:
             shadow_text('Tap Screen to Start',  x, self.bounds.h * 0.6)
             shadow_text('Tilt Screen to Steer', x, self.bounds.h * 0.4)
+
+    def setup_smoke(self):
+        rect = scene.Rect(0, 0, 200, 200)
+        images = get_images_from_zip_file('smokes.zip', 'smoke puff up', 'smoke_puff')
+        self.smoke_normal = AnimatedSprite(rect, self, images, 8)
+
+        rect = scene.Rect(0, 0, 200, 200)
+        images = slice_image_into_tiles(Image.open('Exp_type_C.png'), 48)
+        self.smoke_special = AnimatedSprite(rect, self, images, 2)
 
     def setup(self):
         self.climb = 0
@@ -339,6 +406,7 @@ class MyScene(scene.Scene):
         self.player = Player(rect, self)
         self.player_apex_frame = False
         self.player_max_y = self.bounds.h * 0.6
+        self.setup_smoke()
 
     def draw(self):
         self.game_loop()
@@ -354,4 +422,12 @@ class MyScene(scene.Scene):
         elif self.game_state == GAME_DEAD:
             self.setup()
 
-MyScene()
+def main():
+    global player_name
+    get_remote_resources()
+    player_name = get_username()
+    #console.hud_alert('Player name: ' + player_name) # for debugging purposes
+    MyScene()
+
+if __name__ == '__main__':
+    main()
