@@ -16,6 +16,7 @@ PLAYER_INITIAL_BOUNCE = 1700
 SCRIPT_NAME  = os.path.basename(__file__)[:-3]
 RESOURCE_DIR = __file__[:-3] + '_resources/'
 USER_FILE = RESOURCE_DIR + 'user.txt'
+
 try:
     os.mkdir(RESOURCE_DIR)
 except OSError:
@@ -61,7 +62,6 @@ class HighScores(object):
 
 def get_remote_resources(in_urls = urls):
     def url_to_local_file(in_url, in_file_name):
-        #print('Downloading: {} --> {}'.format(in_url, in_file_name))
         short_name = in_file_name.rpartition('/')[2] or in_file_name
         console.hud_alert('Downloading: ' + short_name)
         with open(in_file_name, 'w') as out_file:
