@@ -8,9 +8,9 @@ Special thanks to [cclauss][3], [jsbain][4], and [SebastianJarsve] [5] for their
 Additional completed features so far:
 ------
 * Sound Effects played in Threads when the Player:
-	* bounces off a cloud
-	* is killed
-	* gets a new high score
+	* Bounces off a cloud
+	* Is killed
+	* Gets a new high score
 * Play in Portrait or Landscape Mode
 * Player's High Score is saved
 	* Player's name is also saved, and only needs to be entered by the player once.
