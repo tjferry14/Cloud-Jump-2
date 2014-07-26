@@ -11,7 +11,7 @@ class Start (scene.Scene):
 		scene.background(0.40, 0.80, 1.00) # light blue background color
 
 		if portrait:
-			self.play_btn_rect = scene.Rect(200, 358, 600, 100)
+			self.play_btn_rect = scene.Rect(140, 600, 470, 100)
 			self.char_btn_rect = scene.Rect(140, 485, 470, 100)
 		else:
 			self.play_btn_rect = scene.Rect(20, 358, 350, 100)
@@ -28,7 +28,7 @@ class Start (scene.Scene):
 		fs, x, y = (65, 380, 650) if portrait else (60, 200, 400)
 		scene.text('Play Game', BUTTON_FONT, font_size=fs, x=x, y=y)
 		scene.tint(0.00, 0.50, 1.00) # blue text color
-		fs, x, y = (54, 380, 521) if portrait else (60, 260, 285)
+		fs, x, y = (54, 380, 540) if portrait else (60, 260, 285)
 		scene.text('Character Select', BUTTON_FONT, font_size=fs, x=x, y=y)
 		scene.tint(1.00, 1.00, 1.00) # white text color
 		fs =  30
