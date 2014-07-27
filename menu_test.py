@@ -10,32 +10,39 @@ class Start (scene.Scene):
 		portrait = self.size.h > self.size.w
 		scene.background(0.40, 0.80, 1.00) # light blue background color
 
+		scene.fill(1.00, 1.00, 1.00) # button fill color
 		if portrait:
-			self.play_btn_rect = scene.Rect(140, 600, 470, 100)
-			self.char_btn_rect = scene.Rect(140, 485, 470, 100)
+			self.play_btn_ellipse = scene.ellipse(140, 600, 100, 100)
+			self.char_btn_ellipse = scene.ellipse(260, 600, 100, 100)
+			self.name_btn_ellipse = scene.ellipse(380, 600, 100, 100)
+			self.leaderboard_btn_ellipse = scene.ellipse(500, 600, 100, 100)
 		else:
-			self.play_btn_rect = scene.Rect(20, 358, 350, 100)
-			self.char_btn_rect = scene.Rect(20, 230, 480, 100)
-
-		scene.fill(0.50, 1.00, 0.00) # play button fill color
-		scene.rect(*self.play_btn_rect)
-		scene.fill(1.00, 1.00, 1.00) # character select button fill color
-		scene.rect(*self.char_btn_rect)
+			self.play_btn_ellipse = scene.ellipse(280, 358, 100, 100)
+			self.char_btn_ellipse = scene.ellipse(400, 358, 100, 100)
+			self.name_btn_ellipse = scene.ellipse(520, 358, 100, 100)
+			self.leaderboard_btn_ellipse = scene.ellipse(640, 358, 100, 100)
+			
+		#scene.ellipse(*self.play_btn_ellipse)
+		#scene.ellipse(*self.char_btn_ellipse)
 
 		scene.tint(1.00, 1.00, 1.00) # white text color
 		fs, x, y = (100, 385, 850) if portrait else (150, 525, 600)
-		scene.text('Cloud Jump', MENU_FONT,  font_size=fs, x=x, y=y)
-		fs, x, y = (65, 380, 650) if portrait else (60, 200, 400)
-		scene.text('Play Game', BUTTON_FONT, font_size=fs, x=x, y=y)
-		scene.tint(0.00, 0.50, 1.00) # blue text color
-		fs, x, y = (54, 380, 540) if portrait else (60, 260, 285)
-		scene.text('Character Select', BUTTON_FONT, font_size=fs, x=x, y=y)
-		scene.tint(1.00, 1.00, 1.00) # white text color
+		scene.text('Cloud Jump', MENU_FONT, font_size=fs, x=x, y=y)
+		
+		x, y = (165, 615) if portrait else (305, 375)
+		scene.image('ionicons-ios7-play-32', x, y)
+		x, y = (280, 615) if portrait else (420, 375)
+		scene.image('ionicons-person-32', x, y)
+		x, y = (400, 615) if portrait else (538, 375)
+		scene.image('ionicons-ios7-compose-outline-32', x, y)
+		x, y = (520, 615) if portrait else (659, 375)
+		scene.image('ionicons-earth-32', x, y)
+		
 		fs =  30
 		if portrait:
 			x, y = self.bounds.w / 2.0, self.bounds.h / 1.34
 		else:
-			x, y = self.bounds.w / 1.4, self.bounds.h / 1.7
+			x, y = self.bounds.w / 2.0, self.bounds.h / 1.45
 		s = 'Welcome {}!'.format(player_name)
 		scene.text(s, MENU_FONT, font_size=fs, x=x, y=y)
 
@@ -43,10 +50,10 @@ class Start (scene.Scene):
 			scene.image('PC_Grass_Block', self.bounds.w / 11 * i, 0)
 
 	def touch_ended(self, touch):
-		if touch.location in self.play_btn_rect:
+		if touch.location in self.play_btn_ellipse:
 			main_scene.switch_scene('#Game Scene Here')
-		elif touch.location in self.char_btn_rect:
-			main_scene.switch_scene('CharacterSelect1')
+		elif touch.location in self.char_btn_ellipse:
+			main_scene.switch_scene(CharacterSelect1)
 
 class CharacterSelect1(scene.Scene):
 	def setup(self):
