@@ -27,7 +27,7 @@ class Start (scene.Scene):
 
 		scene.tint(1.00, 1.00, 1.00) # white text color
 		fs, x, y = (100, 385, 850) if portrait else (150, 525, 600)
-		scene.text('Cloud Jump', MENU_FONT, font_size=fs, x=x, y=y)
+		scene.text('Cloud Jump 2', MENU_FONT, font_size=fs, x=x, y=y)
 		
 		x, y = (165, 615) if portrait else (305, 375)
 		scene.image('ionicons-ios7-play-32', x, y)
