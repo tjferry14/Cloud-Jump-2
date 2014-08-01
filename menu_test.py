@@ -75,7 +75,6 @@ class CharacterSelect1(scene.Scene):
 
 	def draw(self):
 		scene.background(0.40, 0.80, 1.00)
-		scene.fill(1.00, 1.00, 1.00)
 
 		scene.image('Boy', *self.p1_rect)
 		scene.image('Girl', *self.p2_rect)
