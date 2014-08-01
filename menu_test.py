@@ -30,13 +30,13 @@ class Start (scene.Scene):
 		scene.text('Cloud Jump 2', MENU_FONT, font_size=fs, x=x, y=y)
 		
 		x, y = (165, 615) if portrait else (305, 375)
-		scene.image('ionicons-ios7-play-32', x, y)
+		scene.image('ionicons-ios7-play-32', x, y) # play game
 		x, y = (280, 615) if portrait else (420, 375)
-		scene.image('ionicons-person-32', x, y)
+		scene.image('ionicons-person-32', x, y) # change character
 		x, y = (400, 615) if portrait else (538, 375)
-		scene.image('ionicons-ios7-compose-outline-32', x, y)
+		scene.image('ionicons-ios7-compose-outline-32', x, y) # change name
 		x, y = (520, 615) if portrait else (659, 375)
-		scene.image('ionicons-earth-32', x, y)
+		scene.image('ionicons-earth-32', x, y) # view leaderboard
 		
 		fs =  30
 		if portrait:
