@@ -1,5 +1,6 @@
 import cStringIO, console, Image, ImageDraw, math, numpy, os, os.path
-import pickle, random, requests, scene, sound, threading, time, zipfile
+import pickle, random, requests, sound, threading, time, zipfile
+from scene import *
 
 DEAD_ZONE =  0.02
 DIFFICULTY_Q = 100000.0
@@ -90,14 +91,14 @@ def slice_image_into_tiles(in_image, img_count_h, img_count_v = 1):
     w, h = in_image.size  # get the size of the big image
     w /= img_count_h      # calculate the size of smaller images
     h /= img_count_v
-    return [scene.load_pil_image(in_image.crop((x*w, y*h, (x+1)*w, (y+1)*h)))
+    return [load_pil_image(in_image.crop((x*w, y*h, (x+1)*w, (y+1)*h)))
                 for y in xrange(img_count_v) for x in xrange(img_count_h)]
 
 def get_images_from_zip_file(file_name, directory, starts_with):
         with open(file_name) as in_file:
             starts_with = directory + '/' + starts_with
             zip_file = zipfile.ZipFile(in_file)
-            return [scene.load_pil_image(Image.open(cStringIO.StringIO(zip_file.open(name).read())))
+            return [load_pil_image(Image.open(cStringIO.StringIO(zip_file.open(name).read())))
                     for name in zip_file.namelist() if name.startswith(starts_with)]
 
 def player_killed_sounds():
@@ -113,32 +114,32 @@ def high_score_sounds():
 def run_in_thread(in_function):
     threading.Thread(None, in_function).start()
 
-def tinted_text(s, x, y, tint_color = scene.Color(0, 0, 1)):
-    scene.tint(0, 0, 0)
-    scene.text(s, GAME_FONT, 48, x + 2, y - 2)
-    scene.tint(*tint_color)
-    scene.text(s, GAME_FONT, 48, x, y)
+def tinted_text(s, x, y, tint_color = Color(0, 0, 1)):
+    tint(0, 0, 0)
+    text(s, GAME_FONT, 48, x + 2, y - 2)
+    tint(*tint_color)
+    text(s, GAME_FONT, 48, x, y)
 
 def shadow_text(s, x, y):
-    tinted_text(s, x, y, scene.Color(0.0, 0.5, 1.0))
+    tinted_text(s, x, y, Color(0.0, 0.5, 1.0))
 
 def score_text(s, x, y):
-    tinted_text(s, x, y, scene.Color(1.0, 1.0, 0.4))
+    tinted_text(s, x, y, Color(1.0, 1.0, 0.4))
 
 def pil_rect_to_scene_rect(pil_rect = (1, 2, 3 ,4)):
     if pil_rect:
         l, t, r, b = pil_rect
-        return scene.Rect(l, t, r-l, b-t)
+        return Rect(l, t, r-l, b-t)
     else:
-        return scene.Rect()
+        return Rect()
 
-class Sprite(scene.Layer):
-    def __init__(self, rect = scene.Rect(), parent = None, image_name = 'Boy'):
+class Sprite(Layer):
+    def __init__(self, rect = Rect(), parent = None, image_name = 'Boy'):
         super(Sprite, self).__init__(rect)
         if parent:
             parent.add_layer(self)
         self.image = image_name
-        self.velocity = scene.Point(0, 0)
+        self.velocity = Point(0, 0)
 
     def update(self, dt):  # make the clouds blow in the wind?
         super(Sprite, self).update(dt)
@@ -175,7 +176,7 @@ class AnimatedSprite(Sprite):
                 self.is_done = True
 
 class Player(Sprite):
-    def __init__(self, rect = scene.Rect(), parent = None):
+    def __init__(self, rect = Rect(), parent = None):
         super(self.__class__, self).__init__(rect, parent, GAME_CHARACTER)
 
     def death_completion(self):
@@ -190,20 +191,20 @@ class Player(Sprite):
         #del self  # suicide is not an tenable option
 
 class GrassBlock(Sprite):
-    def __init__(self, rect = scene.Rect(), parent = None):
+    def __init__(self, rect = Rect(), parent = None):
         super(self.__class__, self).__init__(rect, parent, 'PC_Grass_Block')
 
 class Enemy(Sprite):
-    def __init__(self, rect = scene.Rect(), parent = None):
+    def __init__(self, rect = Rect(), parent = None):
         super(self.__class__, self).__init__(rect, parent, 'Alien_Monster')
-        self.tint = scene.Color(1, 0, 1)
+        self.tint = Color(1, 0, 1)
 
 class Cloud(Sprite):
-    def __init__(self, rect = scene.Rect(), parent = None):
+    def __init__(self, rect = Rect(), parent = None):
         cloud_image = self.cloud_maker()
         new_rect = pil_rect_to_scene_rect(cloud_image.getbbox())
         rect.w, rect.h = new_rect.w, new_rect.h
-        super(self.__class__, self).__init__(rect, parent, scene.load_pil_image(cloud_image))
+        super(self.__class__, self).__init__(rect, parent, load_pil_image(cloud_image))
         self.velocity.x = random.randint(-1, 4)  # give clouds a 2-in-6 chance to be moving
         if self.velocity.x > 1:
             self.velocity.x = 0
@@ -255,15 +256,15 @@ class Cloud(Sprite):
         del draw
         return cls.crop_image(img)
 
-class MyScene(scene.Scene):
+class MyScene(Scene):
     def __init__(self):
-        scene.run(self)
+        run(self)
 
     def create_ground(self, max_blocks = 12):
         block_size_w = self.bounds.w / max_blocks
         block_size_h = block_size_w * 171 / 101  # image is 101 x 171 pixels
         for i in xrange(max_blocks):
-            rect = scene.Rect(i * block_size_w, 0, block_size_w, block_size_h)
+            rect = Rect(i * block_size_w, 0, block_size_w, block_size_h)
             GrassBlock(rect, self)
         return block_size_h * 0.7  # the new ground level
 
@@ -274,12 +275,12 @@ class MyScene(scene.Scene):
             min_dist = int(MAX_CLOUD_DIST * q / DIFFICULTY_Q)
             max_dist = int(MAX_CLOUD_DIST / 2 + min_dist / 2)
             self.cloud_height += random.randint(min_dist, max_dist)
-            rect = scene.Rect(random.random() * (self.bounds.w - 150),
+            rect = Rect(random.random() * (self.bounds.w - 150),
                               self.cloud_height, 0, 0)
             cloud = Cloud(rect, self)
             if random.random() < ENEMY_DENSITY:
                 #generate new enemy
-                rect = scene.Rect(0, 0, 64, 64)
+                rect = Rect(0, 0, 64, 64)
                 rect.center(cloud.frame.center())
                 rect.y = cloud.frame.top() - 15
                 enemy = Enemy(rect, self)
@@ -292,7 +293,7 @@ class MyScene(scene.Scene):
                 del sublayer
 
     def control_player(self):
-        tilt = scene.gravity().x
+        tilt = gravity().x
         if abs(tilt) > DEAD_ZONE:
             move = self.dt * tilt * PLAYER_CONTROL_SPEED
             self.player.frame.x += move
@@ -309,7 +310,7 @@ class MyScene(scene.Scene):
 
     def end_game(self):
         self.game_state = GAME_DEAD
-        self.player.velocity = scene.Point(0, 0)
+        self.player.velocity = Point(0, 0)
         death_loc = self.player.frame.center()
         death_loc.y = max(death_loc.y, 80)
         self.player.die()
@@ -390,12 +391,12 @@ class MyScene(scene.Scene):
             shadow_text('Tilt Screen to Steer', x, self.bounds.h * 0.4)
 
     def setup_smoke(self):
-        rect = scene.Rect(0, 0, 200, 200)
+        rect = Rect(0, 0, 200, 200)
         file_name = RESOURCE_DIR + 'smokes.zip'
         images = get_images_from_zip_file(file_name, 'smoke puff up', 'smoke_puff')
         self.smoke_normal = AnimatedSprite(rect, self, images, 8)
 
-        rect = scene.Rect(0, 0, 200, 200)
+        rect = Rect(0, 0, 200, 200)
         file_name = RESOURCE_DIR + 'Exp_type_C.png'
         images = slice_image_into_tiles(Image.open(file_name), 48)
         self.smoke_special = AnimatedSprite(rect, self, images, 2)
@@ -409,7 +410,7 @@ class MyScene(scene.Scene):
         ground_level = self.create_ground(12)
         self.generate_clouds()
         
-        rect = scene.Rect(0, 0, IMAGE_WIDTH, IMAGE_WIDTH)
+        rect = Rect(0, 0, IMAGE_WIDTH, IMAGE_WIDTH)
         rect.center(self.bounds.center())
         rect.y = ground_level
         self.player = Player(rect, self)
@@ -419,7 +420,7 @@ class MyScene(scene.Scene):
 
     def draw(self):
         self.game_loop()
-        scene.background(0.40, 0.80, 1.00)
+        background(0.40, 0.80, 1.00)
         self.root_layer.update(self.dt)
         self.root_layer.draw()
         self.draw_text()
