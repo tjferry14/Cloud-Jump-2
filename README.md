@@ -1,9 +1,9 @@
 Cloud Jump 2
 ================
 
-Expanding on [BashedCrab][1]'s original [Cloud Jump][2].
+Expanding on [BashedCrab][]'s original [Cloud Jump][].
 
-Special thanks to [cclauss][3], [jsbain][4], and [SebastianJarsve] [5] for their contributions. 
+Special thanks to [cclauss][], [jsbain][], and [SebastianJarsve] [] for their contributions. 
 
 Additional completed features so far:
 ------
@@ -18,11 +18,11 @@ Additional completed features so far:
 * Program now uses sprites instead of images
 	* Sprites greatly simplify updating and drawing code by moving to scene.Layers.
 
-See the [repo's issue page][6] to find out what is currently being worked on and what will be implemented next.
+See the [repo's issue page][] to find out what is currently being worked on and what will be implemented next.
 
-[1]: https://gist.github.com/BashedCrab
-[2]: https://gist.github.com/BashedCrab/9098744
-[3]: https://github.com/cclauss
-[4]: https://github.com/jsbain
-[5]: https://github.com/SebastianJarsve
-[6]: https://github.com/tjferry14/Cloud-Jump-2/issues/milestones
+[BashedCrab]: https://gist.github.com/BashedCrab
+[Cloud Jump]: https://gist.github.com/BashedCrab/9098744
+[cclauss]: https://github.com/cclauss
+[jsbain]: https://github.com/jsbain
+[SebastianJarsve]: https://github.com/SebastianJarsve
+[repo's issue page]: https://github.com/tjferry14/Cloud-Jump-2/milestones
