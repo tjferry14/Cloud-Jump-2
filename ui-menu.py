@@ -50,28 +50,31 @@ class HighScoreView(ui.View):
                                    high_scores.keys()), reverse=True)
         return ['{:7>}  |  {}'.format(s, n) for s, n in scores_sorted]
 
+class UserNameView(ui.View):
+    def __init__(self, default_user_name='Name'):
+        self.name = 'Enter your username:'
+        self.background_color = 0.40, 0.80, 1.00
+        self.label = ui.Label(frame=(12, 100, 2000, 55))
+        self.label.text = 'What is your name?'
+        self.label.text_color = 0.00, 0.00, 0.00
+        self.label.font = ('Avenir-Black', 55)
+        self.add_subview(self.label)
+        self.text_field = ui.TextField(frame=(155, 175, 200, 32))
+        self.text_field.text = default_user_name
+        self.text_field.text_color = 0.50, 0.50, 0.50
+        self.text_field.clear_button_mode = 'while_editing'
+        self.add_subview(self.text_field)
+        button = ui.Button(background_color='white',
+                   frame=(360, 175, 75, 36),
+                   image=ui.Image.named('ionicons-arrow-right-a-32'))
+        self.add_subview(button)
+        self.present(style='sheet', hide_title_bar=True)
+
 def change_character(sender):
     SelectACharacterView()
 
 def change_name(sender):
-    superview = sender.superview
-    label = ui.Label()
-    label.text = 'Your name?'
-    label.center = superview.center
-    label.y *= 1.5
-    superview.add_subview(label)
-    user_name = ui.TextField(frame=(0, 0, 200, 25))
-    user_name.text = 'TJ'
-    user_name.center = label.center
-    user_name.y += 30
-    #button_items = [ui.ButtonItem(title=n) for n in 'Al Bob Carl David Elliot Freddie'.split()]
-    #user_name.left_button_items = button_items
-    user_name.clear_button_mode = 'unless_editing'
-    superview.add_subview(user_name)
-    OK = ui.Button(title = 'OK')
-    OK.center = user_name.center
-    OK.y += 30
-    superview.add_subview(OK)
+    UserNameView()
 
 def show_leaderboard(sender):
     HighScoreView()
