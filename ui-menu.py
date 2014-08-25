@@ -26,9 +26,8 @@ class SelectACharacterView(ui.View):
 
     @classmethod
     def make_button(cls, x, image_name = 'Boy'):
-        button = ui.Button(name=image_name,
-                           frame=(x, 160, 128, 128),
-                           image=ui.Image.named(image_name).with_rendering_mode(ui.RENDERING_MODE_ORIGINAL))
+        img = ui.Image.named(image_name).with_rendering_mode(ui.RENDERING_MODE_ORIGINAL)
+        button = ui.Button(name=image_name, frame=(x, 160, 128, 128), image=img)
         button.action=cls.character_tapped
         return button
 
