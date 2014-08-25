@@ -15,7 +15,7 @@ class SelectACharacterView(ui.View):
     @classmethod
     def make_header(cls):
         header = ui.Label(frame = (200, 19.5, 700, 116.5))
-        header.text_color = (1.00, 1.00, 1.00)
+        header.text_color = 'white'
         header.text = 'Select A Character'
         header.font = ('AvenirNext-Heavy', 70)
         return header
@@ -56,12 +56,12 @@ class UserNameView(ui.View):
         self.background_color = 0.40, 0.80, 1.00
         self.label = ui.Label(frame=(12, 100, 2000, 55))
         self.label.text = 'What is your name?'
-        self.label.text_color = 0.00, 0.00, 0.00
+        self.label.text_color = 'black'
         self.label.font = ('Avenir-Black', 55)
         self.add_subview(self.label)
         self.text_field = ui.TextField(frame=(155, 175, 200, 32))
         self.text_field.text = default_user_name
-        self.text_field.text_color = 0.50, 0.50, 0.50
+        self.text_field.text_color = 'grey'
         self.text_field.clear_button_mode = 'while_editing'
         self.add_subview(self.text_field)
         button = ui.Button(background_color='white',
