@@ -6,11 +6,12 @@ high_scores = {n:(i+1)*1000 for i, n in enumerate('Al Bob Carl David Elliot Fred
 
 class SelectACharacterView(ui.View):
     def __init__(self):
+        self.name = 'Cloud Jump 2 -- Select A Character'
         self.background_color = (0.40, 0.80, 1.00)
         self.add_subview(self.make_header())
         for i, character in enumerate(characters):
             self.add_subview(self.make_button(40 + i * 155, character))
-        self.present(style='full_screen', hide_title_bar=True)
+        self.present()
 
     @classmethod
     def make_header(cls):
@@ -23,6 +24,7 @@ class SelectACharacterView(ui.View):
     @classmethod
     def character_tapped(cls, sender):
         print('The user wants to be: ' + sender.name)
+        sender.superview.close()
 
     @classmethod
     def make_button(cls, x, image_name = 'Boy'):
@@ -33,15 +35,13 @@ class SelectACharacterView(ui.View):
 
 class HighScoreView(ui.View):
     def __init__(self, high_scores=high_scores):
-        self.title = 'CloudJump2 -- Leaderboard'
-        self.text = 'CloudJump2 -- Leaderboard'
+        self.name = 'Cloud Jump 2 -- Leaderboard'
         tv = ui.TableView()
         tv.flex = 'WH'
         tv.data_source = ui.ListDataSource(items=self.scores_list(high_scores))
         tv.allows_selection = tv.data_source.delete_enabled = False 
         self.add_subview(tv)
         self.present('sheet')
-        #self.wait_modal()
 
     @classmethod
     def scores_list(cls, high_scores):
@@ -51,9 +51,9 @@ class HighScoreView(ui.View):
 
 class UserNameView(ui.View):
     def __init__(self, default_user_name='Name'):
-        self.name = 'Enter your username:'
+        self.name = 'Cloud Jump 2 -- Username'
         self.background_color = 0.40, 0.80, 1.00
-        self.label = ui.Label(frame=(12, 100, 2000, 55))
+        self.label = ui.Label(frame=(12, 100, 2000, 70))
         self.label.text = 'What is your name?'
         self.label.text_color = 'black'
         self.label.font = ('Avenir-Black', 55)
@@ -66,8 +66,16 @@ class UserNameView(ui.View):
         button = ui.Button(background_color='white',
                    frame=(360, 175, 75, 36),
                    image=ui.Image.named('ionicons-arrow-right-a-32'))
+        button.action = self.button_tapped
         self.add_subview(button)
-        self.present(style='sheet', hide_title_bar=True)
+        self.present('sheet')
+
+    @classmethod
+    def button_tapped(cls, sender):
+        username = sender.superview.text_field.text
+        if username:
+            print('The username is: ' + username)
+            sender.superview.close()
 
 def change_character(sender):
     SelectACharacterView()
@@ -83,4 +91,4 @@ def play_game(sender):
 
 v = ui.load_view('ui-menu')
 v.background_color = (0.40, 0.80, 1.00)
-v.present(style='full_screen', hide_title_bar=True)
+v.present()
