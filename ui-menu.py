@@ -1,15 +1,18 @@
 # this is meant to be viewed in landscape mode on an iPad
 import ui
 
-characters = 'Boy Girl Guardsman Hamster_Face Mouse_Face Man'.split()
+characters = 'Boy Girl Guardsman Person_Blond Woman Man Hamster_Face Mouse_Face Bear_Face Cat_Face Cow_Face Dog_Face'.split()
 high_scores = {n:(i+1)*1000 for i, n in enumerate('Al Bob Carl David Elliot Freddie Godzilla'.split())}
 
 class SelectACharacterView(ui.View):
     def __init__(self):
         self.background_color = (0.40, 0.80, 1.00)
         self.add_subview(self.make_header())
+        half = len(characters) / 2
         for i, character in enumerate(characters):
-            self.add_subview(self.make_button(40 + i * 155, character))
+            x = 62 + i % half * 155
+            y = 160 if i < half else 365
+            self.add_subview(self.make_button(x, y, character))
         self.present(style='full_screen', hide_title_bar=True)
 
     @classmethod
@@ -25,16 +28,15 @@ class SelectACharacterView(ui.View):
         print('The user wants to be: ' + sender.name)
 
     @classmethod
-    def make_button(cls, x, image_name = 'Boy'):
+    def make_button(cls, x, y, image_name = 'Boy'):
         img = ui.Image.named(image_name).with_rendering_mode(ui.RENDERING_MODE_ORIGINAL)
-        button = ui.Button(name=image_name, frame=(x, 160, 128, 128), image=img)
+        button = ui.Button(name=image_name, frame=(x, y, 160, 128, 128), image=img)
         button.action=cls.character_tapped
         return button
 
 class HighScoreView(ui.View):
     def __init__(self, high_scores=high_scores):
-        self.title = 'CloudJump2 -- Leaderboard'
-        self.text = 'CloudJump2 -- Leaderboard'
+        self.name = 'Cloud Jump 2 - Leaderboard'
         tv = ui.TableView()
         tv.flex = 'WH'
         tv.data_source = ui.ListDataSource(items=self.scores_list(high_scores))
