@@ -13,7 +13,6 @@ class SelectACharacterView(ui.View):
             x = 62 + i % half * 155
             y = 160 if i < half else 365
             self.add_subview(self.make_button(x, y, character))
-        self.present(style='full_screen', hide_title_bar=True)
 
     @classmethod
     def make_header(cls):
@@ -42,7 +41,6 @@ class HighScoreView(ui.View):
         tv.data_source = ui.ListDataSource(items=self.scores_list(high_scores))
         tv.allows_selection = tv.data_source.delete_enabled = False 
         self.add_subview(tv)
-        self.present('sheet')
         #self.wait_modal()
 
     @classmethod
@@ -69,16 +67,15 @@ class UserNameView(ui.View):
                    frame=(360, 175, 75, 36),
                    image=ui.Image.named('ionicons-arrow-right-a-32'))
         self.add_subview(button)
-        self.present(style='sheet', hide_title_bar=True)
 
 def change_character(sender):
-    SelectACharacterView()
+    SelectACharacterView().present(style='full_screen', hide_title_bar=True)
 
 def change_name(sender):
-    UserNameView()
+    UserNameView().present(style='sheet', hide_title_bar=True)
 
 def show_leaderboard(sender):
-    HighScoreView()
+    HighScoreView().present('sheet')
 
 def play_game(sender):
     ui.close_all()
