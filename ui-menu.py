@@ -33,12 +33,22 @@ class SelectACharacterView(ui.View):
         button.action=cls.character_tapped
         return button
 
+class Data (ui.ListDataSource):
+    def __init__(self, items=None):
+        ui.ListDataSource.__init__(self, items)
+
+    def tableview_cell_for_row(self, tableview, section, row):
+        cell = ui.TableViewCell()
+        cell.text_label.text = str(self.items[row])
+        cell.text_label.alignment = ui.ALIGN_CENTER
+        return cell
+
 class HighScoreView(ui.View):
     def __init__(self, high_scores=high_scores):
         self.name = 'Cloud Jump 2 - Leaderboard'
         tv = ui.TableView()
         tv.flex = 'WH'
-        tv.data_source = ui.ListDataSource(items=self.scores_list(high_scores))
+        tv.data_source = Data(items=self.scores_list(high_scores))
         tv.allows_selection = tv.data_source.delete_enabled = False 
         self.add_subview(tv)
         #self.wait_modal()
