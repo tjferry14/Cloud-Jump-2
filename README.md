@@ -15,7 +15,7 @@ Additional completed features so far:
 * Player's High Score is saved
 	* Player's name is also saved, and only needs to be entered by the player once.
 * Monsters!  Be careful, you can use the same cloud as a monster but don't land on one!!
-* Program now uses sprites instead of images
+* Program uses sprites instead of images
 	* Sprites greatly simplify updating and drawing code by moving to scene.Layers.
 
 See the [repo's issue page][] to find out what is currently being worked on and what will be implemented next.
