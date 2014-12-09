@@ -6,7 +6,7 @@ import ui
 DEAD_ZONE =  0.02
 DIFFICULTY_Q = 100000.0
 ENEMY_DENSITY = 0.2
-GAME_CHARACTER = 'Boy'
+game_character = 'Boy'
 GAME_FONT = 'AppleSDGothicNeo-Bold' # easier to change font later
 GAME_GRAVITY = 2000
 GAME_WAITING, GAME_PLAYING, GAME_DEAD = range(3)
@@ -65,9 +65,11 @@ class HighScores(object):
 def get_remote_resources(in_urls = urls):
     def url_to_local_file(in_url, in_file_name):
         short_name = in_file_name.rpartition('/')[2] or in_file_name
-        console.hud_alert('Downloading: ' + short_name)
+        console.show_activity('Downloading: ' + short_name)
+        time.sleep(1)
         with open(in_file_name, 'w') as out_file:
             out_file.write(requests.get(in_url).content)
+        console.hide_activity()
 
     for url in in_urls:
         file_name = RESOURCE_DIR + (url.rpartition('/')[2] or url)
@@ -178,7 +180,7 @@ class AnimatedSprite(Sprite):
 
 class Player(Sprite):
     def __init__(self, rect = Rect(), parent = None):
-        super(self.__class__, self).__init__(rect, parent, GAME_CHARACTER)
+        super(self.__class__, self).__init__(rect, parent, game_character)
 
     def death_completion(self):
         self.superlayer.remove_layer(self)
@@ -457,6 +459,8 @@ class SelectACharacterView(ui.View):
     @classmethod
     def character_tapped(cls, sender):
         print('The user wants to be: ' + sender.name)
+        game_character == sender.name
+        print game_character
 
     @classmethod
     def make_button(cls, x, y, image_name = 'Boy'):
