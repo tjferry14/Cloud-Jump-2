@@ -482,12 +482,12 @@ class Data (ui.ListDataSource):
 class HighScoreView(ui.View):
     def __init__(self, high_scores=high_scores):
         self.name = 'Cloud Jump 2 - Leaderboard'
+        self.frame=(0, 0, 500, 500)
         tv = ui.TableView()
-        tv.flex = 'WH'
+        tv.frame=(0, 0, 500, 500)
         tv.data_source = Data(items=self.scores_list(high_scores))
         tv.allows_selection = tv.data_source.delete_enabled = False 
         self.add_subview(tv)
-        #self.wait_modal()
 
     @classmethod
     def scores_list(cls, high_scores):
@@ -499,6 +499,7 @@ class UserNameView(ui.View):
     def __init__(self, default_user_name='Name'):
         self.name = 'Enter your username:'
         self.background_color = 0.40, 0.80, 1.00
+        self.frame=(0, 0, 500, 500)
         self.label = ui.Label(frame=(12, 100, 2000, 55))
         self.label.text = 'What is your name?'
         self.label.text_color = 'black'
