@@ -3,7 +3,7 @@ Cloud Jump 2 (WIP)
 
 Expanding on [BashedCrab][]'s original [Cloud Jump][].
 
-Special thanks to @cclauss, [jsbain][], and [SebastianJarsve] [] for their contributions. 
+Special thanks to [cclauss][], [jsbain][], and [SebastianJarsve] [] for their contributions. 
 
 Additional completed features so far:
 ------
@@ -22,6 +22,7 @@ See the [repo's issue page][] to find out what is currently being worked on and 
 
 [BashedCrab]: https://gist.github.com/BashedCrab
 [Cloud Jump]: https://gist.github.com/BashedCrab/9098744
+[cclauss]: https://github.com/cclauss
 [jsbain]: https://github.com/jsbain
 [SebastianJarsve]: https://github.com/SebastianJarsve
 [repo's issue page]: https://github.com/tjferry14/Cloud-Jump-2/milestones
