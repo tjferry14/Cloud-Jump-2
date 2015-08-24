@@ -456,7 +456,7 @@ class SelectACharacterView(ui.View):
     @classmethod
     def character_tapped(cls, sender):
         print('The user wants to be: ' + sender.name)
-        game_character == sender.name
+        game_character = sender.name
         print game_character
 
     @classmethod
