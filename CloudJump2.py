@@ -260,9 +260,6 @@ class Cloud(Sprite):
         return cls.crop_image(img)
 
 class MyScene(Scene):
-    def __init__(self):
-        run(self)
-
     def create_ground(self, max_blocks = 12):
         block_size_w = self.bounds.w / max_blocks
         block_size_h = block_size_w * 171 / 101  # image is 101 x 171 pixels
