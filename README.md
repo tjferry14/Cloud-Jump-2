@@ -3,7 +3,7 @@ Cloud Jump 2 (WIP)
 
 Expanding on [BashedCrab][]'s original [Cloud Jump][].
 
-Special thanks to [cclauss][], [jsbain][], and [SebastianJarsve] [] for their contributions. 
+Special thanks to [cclauss][], [jsbain][], and [SebastianJarsve][] for their contributions. 
 
 Additional completed features so far:
 ------
