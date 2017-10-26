@@ -15,7 +15,8 @@ import ImageDraw
 import numpy
 import sound
 import ui
-from scene import *
+from scene import (Color, Layer, Point, Rect, Scene, SceneView,
+                   background, gravity, load_pil_image, text, tint)
 
 DEAD_ZONE = 0.02
 DIFFICULTY_Q = 100000.0
