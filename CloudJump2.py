@@ -1,6 +1,5 @@
-import cStringIO
+import io
 import os
-import os.path
 import pickle
 import random
 import threading
