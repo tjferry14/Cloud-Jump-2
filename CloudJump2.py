@@ -140,7 +140,7 @@ def run_in_thread(in_function):
     threading.Thread(None, in_function).start()
 
 
-def tinted_text(s, x, y, tint_color=Color(0, 0, 1)):
+def tinted_text(s, x, y, tint_color=Color(0, 0, 1, 0)):
     tint(0, 0, 0)
     text(s, GAME_FONT, 48, x + 2, y - 2)
     tint(*tint_color)
@@ -148,11 +148,11 @@ def tinted_text(s, x, y, tint_color=Color(0, 0, 1)):
 
 
 def shadow_text(s, x, y):
-    tinted_text(s, x, y, Color(0.0, 0.5, 1.0))
+    tinted_text(s, x, y, Color(0.0, 0.5, 1.0, 0))
 
 
 def score_text(s, x, y):
-    tinted_text(s, x, y, Color(1.0, 1.0, 0.4))
+    tinted_text(s, x, y, Color(1.0, 1.0, 0.4, 0))
 
 
 def pil_rect_to_scene_rect(pil_rect=(1, 2, 3, 4)):
@@ -231,7 +231,7 @@ class GrassBlock(Sprite):
 class Enemy(Sprite):
     def __init__(self, rect=Rect(), parent=None):
         super(self.__class__, self).__init__(rect, parent, 'Alien_Monster')
-        self.tint = Color(1, 0, 1)
+        self.tint = Color(1, 0, 1, 0)
 
 
 class Cloud(Sprite):
