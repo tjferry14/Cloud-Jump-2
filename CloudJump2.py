@@ -1,4 +1,3 @@
-import io
 import os
 import pickle
 import random
@@ -7,6 +6,7 @@ import time
 import zipfile
 
 import requests
+from six import StringIO
 
 import console
 import Image
@@ -120,7 +120,7 @@ def get_images_from_zip_file(file_name, directory, starts_with):
         with open(file_name) as in_file:
             starts_with = directory + '/' + starts_with
             zip_file = zipfile.ZipFile(in_file)
-            return [load_pil_image(Image.open(cStringIO.StringIO(zip_file.open(name).read())))
+            return [load_pil_image(Image.open(StringIO(zip_file.open(name).read())))
                     for name in zip_file.namelist() if name.startswith(starts_with)]
 
 
