@@ -61,7 +61,7 @@ class HighScores(object):
             return {}
 
     def __save_scores(self):  # private function
-        with open(self.file_name, 'w') as out_file:
+        with open(self.file_name, 'wb') as out_file:
             pickle.dump(self.high_scores, out_file)
 
     def is_high_score(self, name, score):
@@ -103,7 +103,7 @@ def get_username(file_name=USER_FILE):
     if not player_name:
         player_name = console.input_alert('What is your name? ').title()
         if player_name:
-            with open(file_name, 'w') as f:
+            with open(file_name, 'wb') as f:
                 f.write(player_name)
     return player_name or 'default'
 
